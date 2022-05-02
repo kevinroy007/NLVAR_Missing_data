@@ -295,3 +295,76 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
     
     return dC_dA, dc_dalpha, dc_dw, dc_dk, dc_db, cost_i[t],cost_i_test[t],cost_i_val[t]
 
+
+
+
+def compute_gradients_z(z_data, A, alpha, w, k, b, t):
+    
+    N,N,P = A.shape
+    N,T = z_data.shape
+
+    def sigmoid(x):
+        sig = 1 / (1 + np.exp(-x))
+        return sig
+
+
+    def f(x,i): 
+        a3 = 0
+        a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
+        return (a3.sum() +b[i])
+
+    def f_prime(x,i):
+        a = 0
+        a = alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(w[i,:])
+        return a.sum()
+
+    def g(x,i):
+        return g_b(x, i, alpha, w, k, b)
+
+    def dgz(z,i):
+
+        return 1/ f_prime(g(z[i,tau],i),i)
+
+    
+
+    # z_hat in INTAP paper is same as z_cap of missing data so copying the same steps below
+
+    tilde_y_tm = np.zeros((N, P+1))   #!LEq(7a) from the paper # here i_prime is used instead of i
+    for i_prime in range(N):
+        for p in range(1,P+1):
+            assert t-p >= 0
+            z_i_tmp = z_data[i_prime, t-p]
+            tilde_y_tm[i_prime, p] = g(z_i_tmp,i_prime)
+
+
+
+    hat_y_t = np.zeros((N)) #!LEq(7b)
+    for i_prime in range(N): 
+        for p in range(1,P+1):
+            for j in range(N):
+                 hat_y_t[i_prime] =  hat_y_t[i_prime] + A[i_prime,j,p-1]*tilde_y_tm[j,p]
+
+
+    hat_y_t2 =   np.zeros((N)) #!LEq(7b)
+    for p in range(1,P+1):  #this equation is just to comprae different looping and matrix systems. of theq 7b
+        hat_y_t2 = hat_y_t2 + A[:,:,p-1]@tilde_y_tm[:,p]
+    if not np.linalg.norm(hat_y_t - hat_y_t2) < 1e-5:
+        print("error in looping and matrix")
+        pdb.set_trace()
+    
+
+    hat_z_t = np.zeros((N,T)) #!LEq(7c) #non need of entire matrix as we are passing only one column
+    for i_prime in range(N):    
+        hat_z_t[i_prime,t] = f(hat_y_t[i_prime],i_prime)  
+
+    # here hat_z_t is same as z_cap corresponding to equation 5 on missing data
+    
+    
+    dC_dZ = 0
+    for i in range(N):
+        for tau in range(t-P,t):
+            if tau == t:
+                S = ( hat_z_t[:,t] - z_data[:,t])
+                dC_dZ = np.sum(np.square(S[:]))
+            elif t - P <= tau <= t-1:
+                dC_dZ = A[:,i,t-tau]*dgz(z_data[i,tau],i) 

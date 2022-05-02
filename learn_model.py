@@ -2,7 +2,7 @@ import numpy as np
 from update_params import update_params
 from projection_simplex import projection_simplex_sort as proj_simplex
 import pdb
-
+from update_z_data_missing import update_z_data_missing
 
 def learn_model_init(NE,eta,z_data,lamda,P, M,N_init):
     
@@ -82,6 +82,12 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda): #TODO: make A, alpha,
             # pdb.set_trace()
             # v_z_hat = newobject.forward(z_data)
             # compare_f[t] = sum(abs(hat_z_t - v_z_hat))p
+
+        ######################################################
+        for t in range(P,T):
+            z_data_m = update_z_data_missing(eta, z_data, A, alpha, w, k, b, t)
+
+        ######################################################
 
         v_denominators = np.sum(np.square(z_data), axis=0)
 

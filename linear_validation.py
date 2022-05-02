@@ -8,7 +8,7 @@ import networkx as nx
 from LinearVAR import scaleCoefsUntilStable
 from generating import  nonlinear_VAR_realization
 import matplotlib.pyplot as plt
-from NonlinearVAR import NonlinearVAR
+#from NonlinearVAR import NonlinearVAR
 from LinearVAR_Kevin import learn_model as learn_model_linear
 import networkx as nx
 from networkx.generators.random_graphs import erdos_renyi_graph
