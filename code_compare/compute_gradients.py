@@ -298,7 +298,7 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 
 
 
-def compute_gradients_z(z_data, A, alpha, w, k, b, t):
+def compute_gradients_z(z_data, A, alpha, w, k, b, t, m_p, z_data_mask):
     
     N,N,P = A.shape
     N,T = z_data.shape
@@ -360,11 +360,20 @@ def compute_gradients_z(z_data, A, alpha, w, k, b, t):
     # here hat_z_t is same as z_cap corresponding to equation 5 on missing data
     
     
-    dC_dZ = 0
+    dC_dZ = np.zeros(N,T)
+    
+
     for i in range(N):
         for tau in range(t-P,t):
             if tau == t:
-                S = ( hat_z_t[:,t] - z_data[:,t])
-                dC_dZ = np.sum(np.square(S[:]))
+                S = (z_data[:,t] -  hat_z_t[:,t])
+                dC_dZ[i,tau] = np.sum(np.square(S[:]))
             elif t - P <= tau <= t-1:
-                dC_dZ = A[:,i,t-tau]*dgz(z_data[i,tau],i) 
+                dC_dZ[i,tau] = -1*S[i]*f_prime(hat_y_t[i],i)*A[:,i,t-tau]*dgz(z_data[i,tau],i) -1*m_p[i,t]*2/950 *(z_data_mask[i,t] - np.dot(m_p[i,t],z_data[i,t]))
+            
+            z_data[i,tau] = z_data[i,tau] - 0.001*dC_dZ[i,tau]
+
+    
+    S1 = z_data_mask[:,t] - z_data[:,t]*m_p[t]
+    cost_missing = np.square(S1[:])
+    return z_data,cost_missing

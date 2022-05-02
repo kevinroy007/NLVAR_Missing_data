@@ -32,7 +32,7 @@ def multiprocess_train_lost_list(lamda):
     P = 2
     NE = 50
 #  
-    etal = 0.001
+    etal = 0.01
    
 
     A = np.ones((N,N,P))

@@ -4,7 +4,7 @@ from projection_simplex import projection_simplex_sort as proj_simplex
 import pdb
 from update_z_data_missing import update_z_data_missing
 
-def learn_model_init(NE,eta,z_data,lamda,P, M,N_init):
+def learn_model_init(NE,eta,z_data,lamda,P, M,N_init,m_p,z_data_mask):
     
     cost  = [0]*N_init
     cost_test = [0]*N_init
@@ -22,7 +22,7 @@ def learn_model_init(NE,eta,z_data,lamda,P, M,N_init):
         b = np.random.rand(N)
         A = np.random.randn(N,N,P)
        
-        cost[i],cost_test[i],A_n[i],cost_val[i] = learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda) 
+        cost[i],cost_test[i],A_n[i],cost_val[i] = learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask) 
         cost_f[i] = cost[i][NE-1]
      
     arg_min = np.argmin(cost_f)
@@ -34,7 +34,7 @@ def learn_model_init(NE,eta,z_data,lamda,P, M,N_init):
 
     
 
-def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda): #TODO: make A, alpha, w, k, b optional
+def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask): #TODO: make A, alpha, w, k, b optional
     
     N, T = z_data.shape
     N2,N3,P = A.shape
@@ -67,6 +67,7 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda): #TODO: make A, alpha,
     cost_history = np.zeros(NE)
     cost_history_test = np.zeros(NE)
     cost_history_val  = np.zeros(NE)
+    cost_history_missing = np.zeros(NE)
     for epoch in range(NE):  
         print("Non linear epoch",epoch)
         cost = np.zeros(T)
@@ -79,26 +80,29 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda): #TODO: make A, alpha,
             # hat_z_t = np.zeros(N)    
             # v_z_hat = np.zeros(N) 
             A, alpha, w, k, b, cost[t],cost_test[t],cost_val[t] = update_params(eta, z_data, A, alpha, w, k, b, t, z_difference,lamda)
+            #z_data_m = update_params(eta, z_data, A, alpha, w, k, b, t, z_difference,lamda,m_p,z_data_mask)
             # pdb.set_trace()
             # v_z_hat = newobject.forward(z_data)
             # compare_f[t] = sum(abs(hat_z_t - v_z_hat))p
 
         ######################################################
         for t in range(P,T):
-            z_data_m = update_z_data_missing(eta, z_data, A, alpha, w, k, b, t)
 
+            z_data,cost_missing = update_z_data_missing(eta, z_data, A, alpha, w, k, b, t, m_p, z_data_mask)
+            
         ######################################################
 
         v_denominators = np.sum(np.square(z_data), axis=0)
+        v_denominators2 = np.sum(np.square(z_data_mask), axis=0)
 
         cost_history[epoch] = sum(cost)/sum(v_denominators[0:int(0.7*T)])
         cost_history_test[epoch] = sum(cost_test)/sum(v_denominators[int(0.7*T):int(0.9*T)])
         cost_history_val[epoch] = sum(cost_val)/sum(v_denominators[int(0.9*T):-1])
-
+        cost_history_missing[epoch] = sum(cost_missing)/sum(v_denominators2)
 
 
     #pdb.set_trace()
-    return  cost_history,cost_history_test,A,cost_history_val
+    return  cost_history,cost_history_test,A,cost_history_val,z_data,cost_history_missing
 
 
     
