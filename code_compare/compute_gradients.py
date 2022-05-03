@@ -323,7 +323,7 @@ def compute_gradients_z(z_data, A, alpha, w, k, b, t, m_p, z_data_mask):
 
     def dgz(z,i):
 
-        return 1/ f_prime(g(z[i,tau],i),i)
+        return 1/ (f_prime(g(z,i),i))
 
     
 
@@ -360,20 +360,27 @@ def compute_gradients_z(z_data, A, alpha, w, k, b, t, m_p, z_data_mask):
     # here hat_z_t is same as z_cap corresponding to equation 5 on missing data
     
     
-    dC_dZ = np.zeros(N,T)
+    dC_dZ = np.zeros((N,T))
     
+    Mt = np.count_nonzero(m_p)
+    
+    S = (z_data[:,t] -  hat_z_t[:,t])
 
     for i in range(N):
         for tau in range(t-P,t):
             if tau == t:
-                S = (z_data[:,t] -  hat_z_t[:,t])
                 dC_dZ[i,tau] = np.sum(np.square(S[:]))
-            elif t - P <= tau <= t-1:
-                dC_dZ[i,tau] = -1*S[i]*f_prime(hat_y_t[i],i)*A[:,i,t-tau]*dgz(z_data[i,tau],i) -1*m_p[i,t]*2/950 *(z_data_mask[i,t] - np.dot(m_p[i,t],z_data[i,t]))
-            
-            z_data[i,tau] = z_data[i,tau] - 0.001*dC_dZ[i,tau]
+            elif t - P <= tau <= t:
+                dC_dZ_a = 0
+                # try:
+                #     dC_dZ[i,tau] = -1*S[i]*f_prime(hat_y_t[i],i)*A[:,i,t-tau-1]*dgz(z_data[i,tau],i) #-1*m_p[i,t]*2/Mt *(z_data_mask[i,t] - np.dot(m_p[i,t],z_data[i,t]))
+                # except: pdb.set_trace()
+                for n in range(N):   # do the sum calculation from here
+                    dC_dZ_a  = dC_dZ_a -1*S[n]*f_prime(hat_y_t[n],i)*A[n,i,t-tau-1]*dgz(z_data[i,tau],i) -1*m_p[n,t]*2/Mt *(z_data_mask[n,t] - np.dot(m_p[n,t],z_data[n,t]))
+            dC_dZ[i,tau] = dC_dZ_a
 
     
-    S1 = z_data_mask[:,t] - z_data[:,t]*m_p[t]
+    S1 = z_data_mask[:,t] - z_data[:,t]*m_p[:,t]
     cost_missing = np.square(S1[:])
-    return z_data,cost_missing
+
+    return z_data,cost_missing,dC_dZ

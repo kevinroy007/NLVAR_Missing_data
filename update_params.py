@@ -7,7 +7,7 @@ from projection_simplex import projection_simplex_sort as proj_simplex
 
 
     
-def update_params(eta, z_data, A, alpha, w, k, b, t, z_range,lamda,m_p,z_data_mask):
+def update_params(eta, z_data, A, alpha, w, k, b, t, z_range,lamda):
     N,N,P = A.shape
     N,M = k.shape
     #for i in range(N):  # this way of formulation is wrong (loop should be inside backward)

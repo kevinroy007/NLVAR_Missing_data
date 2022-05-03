@@ -35,9 +35,9 @@ def g_bisection(z, i, alpha, w, k, b):
     zu = np.sum(alpha[i,:]) + b[i]
     zl = b[i]
     vy = 0   
-    if z >= zu or z <= zl:
-        pdb.set_trace()
-    assert z < zu and z > zl,"z out of range"
+    # if z >= zu or z <= zl:
+    #     pdb.set_trace()
+    # assert z < zu and z > zl,"z out of range"
     yl = -10
     while f(yl,i) > z:
         yl = yl*10

@@ -46,7 +46,6 @@ z_data_mask = np.multiply(z_data_real,m_p)           # masked true data
 N,T = z_data_real.shape()  
 z_data = np.random.rand(N,T)                         # the paramerter to be learned
 
-
 pdb.set_trace()
 
 def multiprocess_train_lost_list(lamda):    
@@ -62,14 +61,14 @@ def multiprocess_train_lost_list(lamda):
     
     ##########################################################################################
 
-    pickle.dump(cost,open("lambda_sweep_f_n_2/cost_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(cost_val,open("lambda_sweep_f_n_2/cost_val_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(cost_test,open("lambda_sweep_f_n_2/cost_test_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(cost_val[NE-1],open("lambda_sweep_f_n_2/val_lambda_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(A_n,open("lambda_sweep_f_n_2/A_n_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost,open("lambda_sweep_f_n/cost_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost_val,open("lambda_sweep_f_n/cost_val_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost_test,open("lambda_sweep_f_n/cost_test_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost_val[NE-1],open("lambda_sweep_f_n/val_lambda_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(A_n,open("lambda_sweep_f_n/A_n_"+str(lamda)+"_.txt","wb"))
 
-    pickle.dump(z_data,open("lambda_sweep_f_n_2/z_data_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(cost_history_missing,open("lambda_sweep_f_n_2/cost_history_missing_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(z_data,open("lambda_sweep_f_n/z_data_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost_history_missing,open("lambda_sweep_f_n/cost_history_missing_"+str(lamda)+"_.txt","wb"))
 
 processes = []
 
@@ -77,15 +76,12 @@ processes = []
 
 lam = np.arange(0.001,0.05,0.002)
 
-#lam = np.arange(1,2,1)
 
 pdb.set_trace()
 
-pickle.dump(lam,open("lambda_sweep_f_n_2/lam_LVAR.txt","wb"))
-pickle.dump(NE,open("lambda_sweep_f_n_2/NE.txt","wb"))
+pickle.dump(lam,open("lambda_sweep_f_n/lam_LVAR.txt","wb"))
+pickle.dump(NE,open("lambda_sweep_f_n/NE.txt","wb"))
 
-#pdb.set_trace()
-#etal = np.arange(0.0001, 0.001, 0.0002)
     
     
 if __name__ ==  '__main__':
