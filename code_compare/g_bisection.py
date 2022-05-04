@@ -18,10 +18,14 @@ def g_bisection(z, i, alpha, w, k, b):
 
     
     def sigmoid(x):
-        
-        return np.where(x >= 0, 
-            1 / (1 + np.exp(-x)), 
-            np.exp(x) / (1 + np.exp(x)))
+
+        try:
+            
+            return np.where(x >= 0, 
+                1 / (1 + np.exp(-x)), 
+                np.exp(x) / (1 + np.exp(x)))
+
+        except: pdb.set_trace()
         
     def f(x,i): 
         a3 = 0
@@ -34,10 +38,12 @@ def g_bisection(z, i, alpha, w, k, b):
     max_niter = 1000
     zu = np.sum(alpha[i,:]) + b[i]
     zl = b[i]
-    vy = 0   
-    # if z >= zu or z <= zl:
-    #     pdb.set_trace()
-    # assert z < zu and z > zl,"z out of range"
+    vy = 0  
+
+    if z >= zu or z <= zl:
+        pdb.set_trace()
+    assert z < zu and z > zl,"z out of range"
+    
     yl = -10
     while f(yl,i) > z:
         yl = yl*10

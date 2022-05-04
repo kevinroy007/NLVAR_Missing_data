@@ -2,9 +2,9 @@ import numpy as np
 from update_params import update_params
 from projection_simplex import projection_simplex_sort as proj_simplex
 import pdb
-from update_z_data_missing import update_z_data_missing
+from update_z_missing import update_z_missing
 
-def learn_model_init(NE,eta,z_data,lamda,P, M,N_init,m_p,z_data_mask):
+def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
     
     cost  = [0]*N_init
     cost_test = [0]*N_init
@@ -12,17 +12,20 @@ def learn_model_init(NE,eta,z_data,lamda,P, M,N_init,m_p,z_data_mask):
     cost_f = [0]*N_init
     A_n = [0]*N_init
 
-    N,T = z_data.shape
+    N,T = z_tilde_data.shape
 
     for i in range(N_init):
         print ("random initialisation",i)
+        z = np.random.rand(N,T)
+        z = z[:,0:200]
+        
         alpha = np.random.rand(N,M)
         w = np.random.rand(N,M) 
         k = np.random.randn(N,M)
         b = np.random.rand(N)
         A = np.random.randn(N,N,P)
        
-        cost[i],cost_test[i],A_n[i],cost_val[i] = learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask) 
+        cost[i],cost_test[i],A_n[i],cost_val[i] = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data) 
         cost_f[i] = cost[i][NE-1]
      
     arg_min = np.argmin(cost_f)
@@ -34,9 +37,9 @@ def learn_model_init(NE,eta,z_data,lamda,P, M,N_init,m_p,z_data_mask):
 
     
 
-def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask): #TODO: make A, alpha, w, k, b optional
+def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO: make A, alpha, w, k, b optional
     
-    N, T = z_data.shape
+    N, T = z.shape
     N2,N3,P = A.shape
     assert N==N2 and N==N3
     # document inputs
@@ -45,11 +48,11 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask): #TODO
 
     z_maximum  = np.zeros(N)
     for i in range(N):
-        z_maximum[i] = np.max(z_data[i,:])
+        z_maximum[i] = np.max(z_tilde_data[i,:])
     
     z_minimum  = np.zeros(N)
     for i in range(N):
-        z_minimum[i] = np.min(z_data[i,:])
+        z_minimum[i] = np.min(z_tilde_data[i,:])
     
     z_range = z_maximum-z_minimum
 
@@ -73,27 +76,26 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask): #TODO
         cost = np.zeros(T)
         cost_test = np.zeros(T)
         cost_val = np.zeros(T)
-        hat_z_t = np.zeros((N,T))
+        
         #compare_f = np.zeros(T)
         for t in range(P, T):   
             #pdb.set_trace() 
             # hat_z_t = np.zeros(N)    
             # v_z_hat = np.zeros(N) 
-            A, alpha, w, k, b, cost[t],cost_test[t],cost_val[t] = update_params(eta, z_data, A, alpha, w, k, b, t, z_difference,lamda)
+            A, alpha, w, k, b, cost[t],cost_test[t],cost_val[t] = update_params(eta, z, A, alpha, w, k, b, t, z_difference,lamda)
             #z_data_m = update_params(eta, z_data, A, alpha, w, k, b, t, z_difference,lamda,m_p,z_data_mask)
             # pdb.set_trace()
             # v_z_hat = newobject.forward(z_data)
-            # compare_f[t] = sum(abs(hat_z_t - v_z_hat))p
 
-        ######################################################
+        ################################################################################
         for t in range(P,T):
 
-            z_data,cost_missing = update_z_data_missing(eta, z_data, A, alpha, w, k, b, t, m_p, z_data_mask)
+            z,cost_missing = update_z_missing(eta, z, A, alpha, w, k, b, t, m_data, z_tilde_data)
             
-        ######################################################
+        ################################################################################
 
-        v_denominators = np.sum(np.square(z_data), axis=0)
-        v_denominators2 = np.sum(np.square(z_data_mask), axis=0)
+        v_denominators = np.sum(np.square(z), axis=0)
+        v_denominators2 = np.sum(np.square(z_tilde_data), axis=0)
 
         cost_history[epoch] = sum(cost)/sum(v_denominators[0:int(0.7*T)])
         cost_history_test[epoch] = sum(cost_test)/sum(v_denominators[int(0.7*T):int(0.9*T)])
@@ -102,7 +104,7 @@ def learn_model(NE, eta ,z_data, A, alpha, w, k, b,lamda,m_p,z_data_mask): #TODO
 
 
     #pdb.set_trace()
-    return  cost_history,cost_history_test,A,cost_history_val,z_data,cost_history_missing
+    return  cost_history,cost_history_test,A,cost_history_val,z,cost_history_missing
 
 
     

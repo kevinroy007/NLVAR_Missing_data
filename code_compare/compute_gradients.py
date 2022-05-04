@@ -298,14 +298,16 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 
 
 
-def compute_gradients_z(z_data, A, alpha, w, k, b, t, m_p, z_data_mask):
+def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     
     N,N,P = A.shape
-    N,T = z_data.shape
+    N,T = z_tilde_data.shape
 
     def sigmoid(x):
-        sig = 1 / (1 + np.exp(-x))
-        return sig
+
+        return np.where(x >= 0, 
+                1 / (1 + np.exp(-x)), 
+                np.exp(x) / (1 + np.exp(x)))
 
 
     def f(x,i): 
@@ -333,54 +335,58 @@ def compute_gradients_z(z_data, A, alpha, w, k, b, t, m_p, z_data_mask):
     for i_prime in range(N):
         for p in range(1,P+1):
             assert t-p >= 0
-            z_i_tmp = z_data[i_prime, t-p]
+            z_i_tmp = z[i_prime, t-p]
             tilde_y_tm[i_prime, p] = g(z_i_tmp,i_prime)
 
 
 
-    hat_y_t = np.zeros((N)) #!LEq(7b)
-    for i_prime in range(N): 
-        for p in range(1,P+1):
-            for j in range(N):
-                 hat_y_t[i_prime] =  hat_y_t[i_prime] + A[i_prime,j,p-1]*tilde_y_tm[j,p]
+    # hat_y_t = np.zeros((N)) #!LEq(7b)
+    # for i_prime in range(N): 
+    #     for p in range(1,P+1):
+    #         for j in range(N):
+    #              hat_y_t[i_prime] =  hat_y_t[i_prime] + A[i_prime,j,p-1]*tilde_y_tm[j,p]
 
 
-    hat_y_t2 =   np.zeros((N)) #!LEq(7b)
+    check_y_t =   np.zeros((N)) #!LEq(7b)
     for p in range(1,P+1):  #this equation is just to comprae different looping and matrix systems. of theq 7b
-        hat_y_t2 = hat_y_t2 + A[:,:,p-1]@tilde_y_tm[:,p]
-    if not np.linalg.norm(hat_y_t - hat_y_t2) < 1e-5:
-        print("error in looping and matrix")
-        pdb.set_trace()
+        check_y_t = check_y_t + A[:,:,p-1]@tilde_y_tm[:,p]
+    # if not np.linalg.norm(hat_y_t - hat_y_t2) < 1e-5:
+    #     print("error in looping and matrix")
+    #     pdb.set_trace()
     
 
-    hat_z_t = np.zeros((N,T)) #!LEq(7c) #non need of entire matrix as we are passing only one column
+    check_z_t = np.zeros((N,T)) #!LEq(7c) #non need of entire matrix as we are passing only one column
     for i_prime in range(N):    
-        hat_z_t[i_prime,t] = f(hat_y_t[i_prime],i_prime)  
+        check_z_t[i_prime,t] = f(check_y_t[i_prime],i_prime)  
 
     # here hat_z_t is same as z_cap corresponding to equation 5 on missing data
     
     
-    dC_dZ = np.zeros((N,T))
+    dCt_dZ = np.zeros((N,T))
+    dTC_dZ = np.zeros((N,T))
+
+    Mt = np.count_nonzero(m_data)
     
-    Mt = np.count_nonzero(m_p)
+    S = (z[:,t] -  check_z_t[:,t])
     
-    S = (z_data[:,t] -  hat_z_t[:,t])
+    dDt_dZ_a=0
+    for n in range(N):        
+        dDt_dZ_a = dDt_dZ_a  -m_data[n,t]*2/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
+    dDt_dZt = dDt_dZ_a
 
     for i in range(N):
         for tau in range(t-P,t):
             if tau == t:
-                dC_dZ[i,tau] = np.sum(np.square(S[:]))
+                dCt_dZ[i,tau] = S[i]
             elif t - P <= tau <= t:
-                dC_dZ_a = 0
-                # try:
-                #     dC_dZ[i,tau] = -1*S[i]*f_prime(hat_y_t[i],i)*A[:,i,t-tau-1]*dgz(z_data[i,tau],i) #-1*m_p[i,t]*2/Mt *(z_data_mask[i,t] - np.dot(m_p[i,t],z_data[i,t]))
-                # except: pdb.set_trace()
+                dC_dZ_a = 0        
                 for n in range(N):   # do the sum calculation from here
-                    dC_dZ_a  = dC_dZ_a -1*S[n]*f_prime(hat_y_t[n],i)*A[n,i,t-tau-1]*dgz(z_data[i,tau],i) -1*m_p[n,t]*2/Mt *(z_data_mask[n,t] - np.dot(m_p[n,t],z_data[n,t]))
-            dC_dZ[i,tau] = dC_dZ_a
+                    dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
+            dCt_dZ[i,tau] = dC_dZ_a
 
+    dTC_dZ = dCt_dZ + dDt_dZt
     
-    S1 = z_data_mask[:,t] - z_data[:,t]*m_p[:,t]
+    S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
     cost_missing = np.square(S1[:])
 
-    return z_data,cost_missing,dC_dZ
+    return z,cost_missing,dTC_dZ

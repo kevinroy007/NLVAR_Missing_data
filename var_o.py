@@ -28,16 +28,20 @@ etanl = 0.01
 N_init = 2
 
 NE = 50
+sigma_noise = 0.01
+
 def randbin(M,N,P):  
     return np.random.choice([0, 1], size=(M,N), p=[P, 1-P])
 
-m_p = randbin(10,1000,0.05)
+z_true = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
+N,T = z_true.shape
+m_data = randbin(N,T,0.05)
 
-z_data_real = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
-z_data_mask = np.multiply(z_data_real,m_p)           # masked true data 
 
-N,T = z_data_real.shape
-z_data = np.random.rand(N,T)                         # the paramerter to be learned
+z_noise = np.random.randn(N,T)*sigma_noise
+z_noisy = z_true + z_noise
+z_tilde_data = np.multiply(z_noisy,m_data)           # masked true data 
+
 
 lamda_n = 0.0025
 pdb.set_trace()
@@ -47,15 +51,14 @@ pdb.set_trace()
 def var():
 
     
-    z_data = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
+    #z_data = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
     #z_data = pickle.load(open("lundin_2000_n.txt","rb"))
 
-    z_data = z_data[:,0:200]
     #pdb.set_trace()
     
     ##########################################################################################
 
-    cost,cost_test,A_n,cost_Val = learn_model_init(NE, etanl ,z_data,lamda_n,P, M,N_init,m_p,z_data_mask)
+    cost,cost_test,A_n,cost_Val = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data)
 
     #cost_linear,cost_test_linear,A_l,cost_val_l = learn_model_linear(NE, z_data, A,etal, lamda_l) 
     
