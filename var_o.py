@@ -22,12 +22,10 @@ N=10
 M=10
 
 P = 2
-NE = 5
+NE = 2
 etanl = 0.01 
 
 N_init = 2
-
-NE = 50
 sigma_noise = 0.0001
 
 def randbin(M,N,P):  
@@ -60,12 +58,20 @@ def var():
     
     ##########################################################################################
 
-    cost,cost_test,A_n,cost_Val = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data)
+    cost,cost_test,A_n,cost_Val,z,cost_history_missing = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data)
 
     #cost_linear,cost_test_linear,A_l,cost_val_l = learn_model_linear(NE, z_data, A,etal, lamda_l) 
     
     ##########################################################################################
 
+    pickle.dump(cost,open("lambda_sweep_f_n/cost_"+str(lamda_n)+"_.txt","wb"))
+    #pickle.dump(cost_val,open("lambda_sweep_f_n/cost_val_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(cost_test,open("lambda_sweep_f_n/cost_test_"+str(lamda_n)+"_.txt","wb"))
+    #pickle.dump(cost_val[NE-1],open("lambda_sweep_f_n/val_lambda_"+str(lamda)+"_.txt","wb"))
+    pickle.dump(A_n,open("lambda_sweep_f_n/A_n_"+str(lamda_n)+"_.txt","wb"))
+
+    pickle.dump(z,open("lambda_sweep_f_n/z_data_"+str(lamda_n)+"_.txt","wb"))
+    pickle.dump(cost_history_missing,open("lambda_sweep_f_n/cost_history_missing_"+str(lamda_n)+"_.txt","wb"))
 
     
 def main():

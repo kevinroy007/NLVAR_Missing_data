@@ -4,35 +4,50 @@ from projection_simplex import projection_simplex_sort as proj_simplex
 import pdb
 from update_z_missing import update_z_missing
 
+# def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
+    
+#     cost  = [0]*N_init
+#     cost_test = [0]*N_init
+#     cost_val = [0]*N_init
+#     cost_f = [0]*N_init
+#     A_n = [0]*N_init
+#     cost_history_missing =  [0]*N_init
+#     z = [0]*N_init
+#     N,T = z_tilde_data.shape
+
+#     for i in range(N_init):
+#         print ("random initialisation",i)
+        
+#         z = z_tilde_data
+#         alpha = np.random.rand(N,M)
+#         w = np.random.rand(N,M) 
+#         k = np.random.randn(N,M)
+#         b = np.random.rand(N)
+#         A = np.random.randn(N,N,P)
+       
+#         cost[i],cost_test[i],A_n[i],cost_val[i],z[i],cost_history_missing[i] = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data) 
+#         cost_f[i] = cost[i][NE-1]
+     
+#     arg_min = np.argmin(cost_f)
+    
+#     return cost[arg_min],cost_test[arg_min],A_n[arg_min],cost_val[arg_min],z[arg_min],cost_history_missing[arg_min]
+    
+    
 def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
-    
-    cost  = [0]*N_init
-    cost_test = [0]*N_init
-    cost_val = [0]*N_init
-    cost_f = [0]*N_init
-    A_n = [0]*N_init
-    
+     
     N,T = z_tilde_data.shape
 
-    for i in range(N_init):
-        print ("random initialisation",i)
-        
-        z = z_tilde_data
-        alpha = np.random.rand(N,M)
-        w = np.random.rand(N,M) 
-        k = np.random.randn(N,M)
-        b = np.random.rand(N)
-        A = np.random.randn(N,N,P)
-       
-        cost[i],cost_test[i],A_n[i],cost_val[i] = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data) 
-        cost_f[i] = cost[i][NE-1]
-     
-    arg_min = np.argmin(cost_f)
+    z = z_tilde_data
+    alpha = np.random.rand(N,M)
+    w = np.random.rand(N,M) 
+    k = np.random.randn(N,M)
+    b = np.random.rand(N)
+    A = np.random.randn(N,N,P)
     
-    return cost[arg_min],cost_test[arg_min],A_n[arg_min],cost_val[arg_min]
+    cost,cost_test,A_n,cost_val,z,cost_history_missing = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data) 
+   
+    return cost,cost_test,A_n,cost_val,z,cost_history_missing
     
-    
-
 
     
 
