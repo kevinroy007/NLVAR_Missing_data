@@ -332,6 +332,7 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     # z_hat in INTAP paper is same as z_cap of missing data so copying the same steps below
 
     tilde_y_tm = np.zeros((N, P+1))   #!LEq(7a) from the paper # here i_prime is used instead of i
+    
     for i_prime in range(N):
         for p in range(1,P+1):
             assert t-p >= 0
@@ -362,20 +363,25 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     # here hat_z_t is same as z_cap corresponding to equation 5 on missing data
     
     
-    dCt_dZ = np.zeros((N,T))
-    dTC_dZ = np.zeros((N,T))
+    dCt_dZ  =  np.zeros((N,T))
+    dDt_dZ = np.zeros((N,T))
+    dTC_dZ  =  np.zeros((N,T))
 
     Mt = np.count_nonzero(m_data)
     
     S = (z[:,t] -  check_z_t[:,t])
     
     dDt_dZ_a=0
-    for n in range(N):        
-        dDt_dZ_a = dDt_dZ_a  -m_data[n,t]*2/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
-    dDt_dZt = dDt_dZ_a
+    
+    for i in range(N):
+        for tau in range(P,t):
+            dD_dZ_a=0
+            for n in range(N):        
+                dD_dZ_a = dD_dZ_a  - m_data[n,t]*10/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
+            dDt_dZ[i,tau] = dD_dZ_a
 
     for i in range(N):
-        for tau in range(t-P,t):
+        for tau in range(P,t):
             if tau == t:
                 dCt_dZ[i,tau] = S[i]
             elif t - P <= tau <= t:
@@ -384,7 +390,20 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
                     dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
             dCt_dZ[i,tau] = dC_dZ_a
 
-    dTC_dZ = dCt_dZ + dDt_dZt
+
+
+
+    # for i in range(N):
+    #     for tau in range(t-P,t):
+    #         if tau == t:
+    #             dCt_dZ[i,tau] = S[i]
+    #         elif t - P <= tau <= t:
+    #             dC_dZ_a = 0        
+    #             for n in range(N):   # do the sum calculation from here
+    #                 dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
+    #         dCt_dZ[i,tau] = dC_dZ_a
+
+    dTC_dZ = dCt_dZ + dDt_dZ
     
     S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
     cost_missing = np.square(S1[:])

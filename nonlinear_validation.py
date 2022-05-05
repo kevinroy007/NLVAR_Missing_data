@@ -41,7 +41,7 @@ def randbin(M,N,P):
 m_p = randbin(10,1000,0.05)
 
 z_data_real = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
-z_data_mask = np.multiply(z_data_real,m_p)           # masked true data 
+z_data_mask = np.dot(z_data_real,m_p)           # masked true data 
 
 N,T = z_data_real.shape()  
 z_data = np.random.rand(N,T)                         # the paramerter to be learned

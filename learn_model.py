@@ -11,14 +11,13 @@ def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
     cost_val = [0]*N_init
     cost_f = [0]*N_init
     A_n = [0]*N_init
-
+    
     N,T = z_tilde_data.shape
 
     for i in range(N_init):
         print ("random initialisation",i)
-        z = np.random.rand(N,T)
-        z = z[:,0:200]
         
+        z = z_tilde_data
         alpha = np.random.rand(N,M)
         w = np.random.rand(N,M) 
         k = np.random.randn(N,M)
@@ -77,6 +76,7 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
         cost_test = np.zeros(T)
         cost_val = np.zeros(T)
         
+         
         #compare_f = np.zeros(T)
         for t in range(P, T):   
             #pdb.set_trace() 
@@ -86,12 +86,12 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
             #z_data_m = update_params(eta, z_data, A, alpha, w, k, b, t, z_difference,lamda,m_p,z_data_mask)
             # pdb.set_trace()
             # v_z_hat = newobject.forward(z_data)
-
+        #print("initiated z updation")
         ################################################################################
         for t in range(P,T):
-
+            #print("time stamp for z updation",t)
             z,cost_missing = update_z_missing(eta, z, A, alpha, w, k, b, t, m_data, z_tilde_data)
-            
+           
         ################################################################################
 
         v_denominators = np.sum(np.square(z), axis=0)

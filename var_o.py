@@ -28,7 +28,7 @@ etanl = 0.01
 N_init = 2
 
 NE = 50
-sigma_noise = 0.01
+sigma_noise = 0.00001
 
 def randbin(M,N,P):  
     return np.random.choice([0, 1], size=(M,N), p=[P, 1-P])
@@ -42,6 +42,7 @@ z_noise = np.random.randn(N,T)*sigma_noise
 z_noisy = z_true + z_noise
 z_tilde_data = np.multiply(z_noisy,m_data)           # masked true data 
 
+z_tilde_data = z_tilde_data[:,0:200]
 
 lamda_n = 0.0025
 pdb.set_trace()
@@ -53,6 +54,7 @@ def var():
     
     #z_data = pickle.load(open("results/A_wAs_10_fun_3_n.txt","rb"))
     #z_data = pickle.load(open("lundin_2000_n.txt","rb"))
+
 
     #pdb.set_trace()
     
