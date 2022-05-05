@@ -28,7 +28,7 @@ etanl = 0.01
 N_init = 2
 
 NE = 50
-sigma_noise = 0.00001
+sigma_noise = 0.0001
 
 def randbin(M,N,P):  
     return np.random.choice([0, 1], size=(M,N), p=[P, 1-P])

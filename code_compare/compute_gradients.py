@@ -371,26 +371,28 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     
     S = (z[:,t] -  check_z_t[:,t])
     
-    dDt_dZ_a=0
-    
-    for i in range(N):
-        for tau in range(P,t):
-            if tau == t:
-                dD_dZ_a=0
-                for n in range(N):        
-                    dD_dZ_a = dD_dZ_a  - m_data[n,t]*10/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
-            
-                dDt_dZ[i,tau] = dD_dZ_a
 
-    for i in range(N):
-        for tau in range(P,t):
-            if tau == t:
-                dCt_dZ[i,tau] = S[i]
-            elif t - P <= tau <= t:
-                dC_dZ_a = 0        
-                for n in range(N):   # do the sum calculation from here
-                    dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
-                dCt_dZ[i,tau] = dC_dZ_a
+    if (t < int(T*0.7)):
+
+        for i in range(N):
+            for tau in range(P,t):
+                if tau == t:
+                    dD_dZ_a=0
+                    for n in range(N):        
+                        dD_dZ_a = dD_dZ_a  - m_data[n,t]*1/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
+                
+                    dDt_dZ[i,tau] = dD_dZ_a
+
+        for i in range(N):
+            for tau in range(P,t):
+                if tau == t:
+                    dCt_dZ[i,tau] = S[i]
+                elif t - P <= tau <= t:
+                    dC_dZ_a = 0        
+                    for n in range(N):   # do the sum calculation from here
+                        dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
+                    dCt_dZ[i,tau] = dC_dZ_a
+        dTC_dZ = dCt_dZ + dDt_dZ
 
 
 
@@ -405,9 +407,22 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     #                 dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
     #         dCt_dZ[i,tau] = dC_dZ_a
 
-    dTC_dZ = dCt_dZ + dDt_dZ
+    cost_missing_train = 0
+    cost_missing_test = 0
+    cost_missing_validation = 0
     
-    S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
-    cost_missing = np.square(S1[:])
+    if (t < int(T*0.7)):
+        
+        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        cost_missing_train = np.sum(np.square(S1[:]))
 
-    return z,cost_missing,dTC_dZ
+    elif( int(T*0.7) < t <= int(T*0.8)):
+
+        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        cost_missing_validation = np.sum(np.square(S1[:]))
+
+    else:
+        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        cost_missing_test = np.sum(np.square(S1[:]))
+
+    return z,cost_missing_train,dTC_dZ

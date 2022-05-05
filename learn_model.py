@@ -76,7 +76,7 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
         cost_test = np.zeros(T)
         cost_val = np.zeros(T)
         
-         
+        cost_missing  = np.zeros(T)
         #compare_f = np.zeros(T)
         for t in range(P, T):   
             #pdb.set_trace() 
@@ -90,7 +90,7 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
         ################################################################################
         for t in range(P,T):
             #print("time stamp for z updation",t)
-            z,cost_missing = update_z_missing(eta, z, A, alpha, w, k, b, t, m_data, z_tilde_data)
+            z,cost_missing[t] = update_z_missing(eta, z, A, alpha, w, k, b, t, m_data, z_tilde_data)
            
         ################################################################################
 
