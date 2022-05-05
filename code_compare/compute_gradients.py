@@ -375,10 +375,12 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     
     for i in range(N):
         for tau in range(P,t):
-            dD_dZ_a=0
-            for n in range(N):        
-                dD_dZ_a = dD_dZ_a  - m_data[n,t]*10/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
-            dDt_dZ[i,tau] = dD_dZ_a
+            if tau == t:
+                dD_dZ_a=0
+                for n in range(N):        
+                    dD_dZ_a = dD_dZ_a  - m_data[n,t]*10/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
+            
+                dDt_dZ[i,tau] = dD_dZ_a
 
     for i in range(N):
         for tau in range(P,t):
@@ -388,7 +390,7 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
                 dC_dZ_a = 0        
                 for n in range(N):   # do the sum calculation from here
                     dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
-            dCt_dZ[i,tau] = dC_dZ_a
+                dCt_dZ[i,tau] = dC_dZ_a
 
 
 
