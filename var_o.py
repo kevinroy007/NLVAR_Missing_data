@@ -29,6 +29,8 @@ eta_z = 1e-3
 N_init = 2
 sigma_noise = 0.0001
 
+np.random.seed(0)
+
 def randbin(M,N,P):  
     return np.random.choice([0, 1], size=(M,N), p=[P, 1-P])
 
