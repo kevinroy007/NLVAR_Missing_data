@@ -2,9 +2,8 @@ import numpy as np
 import sys
 sys.path.append('code_compare')
 from  g_bisection import g_bisection as g_b
+from f import f_param, f_prime_param, sigmoid
 import pdb
-
-
 
 def compute_gradients(z_data, A, alpha, w, k, b, t):
 
@@ -34,9 +33,9 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
     
 # remeber to use stable sigmoid and note the time
     
-    def sigmoid(x):
-        sig = 1 / (1 + np.exp(-x))
-        return sig
+    # def sigmoid(x):
+    #     sig = 1 / (1 + np.exp(-x))
+    #     return sig
     # def sigmoid(x): # stable sigmoid
     #     return np.where(x >= 0, 
     #         1 / (1 + np.exp(-x)), 
@@ -45,6 +44,9 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
     # def sigmoid(l):
           
     #      return  1/(1+np.exp(-l)) 
+
+    def f_prime(x,i):
+        return f_prime_param(x,i, alpha, w, k, b)
 
     def dgalpha(x,i):
         
@@ -73,10 +75,11 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
              
     #     return a
 
-    def f_prime(x,i):
-        a = 0
-        a = alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(w[i,:])
-        return a.sum()
+    # def f_prime(x,i):
+    #     a = 0
+    #     a = alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(w[i,:])
+    #     return a.sum()
+    
 
     def dfalpha(x,i): 
 
@@ -92,7 +95,7 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 
         return alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(-1)
 
-        
+
 
     def dfw(x,i): 
 
@@ -110,10 +113,8 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
     #     a2 = a2+a
     #     return a2
 
-    def f(x,i): 
-        a3 = 0
-        a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
-        return (a3.sum() +b[i])
+    def f(x,i):
+        return f_param(x, i, alpha, w, k, b)
 
     # def g(x,i):
     #     try:
@@ -298,7 +299,7 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 
 
 
-def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
+def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperparam_nu):
     
     N,N,P = A.shape
     N,T = z_tilde_data.shape
@@ -310,15 +311,22 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
                 np.exp(x) / (1 + np.exp(x)))
 
 
-    def f(x,i): 
-        a3 = 0
-        a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
-        return (a3.sum() +b[i])
+    # def f(x,i): 
+    #     a3 = 0
+    #     a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
+    #     return (a3.sum() +b[i])
+
+    def f(x,i):
+        return f_param(x, i, alpha, w, k, b)
+    
+
+    # def f_prime(x,i):
+    #     a = 0
+    #     a = alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(w[i,:])
+    #     return a.sum()
 
     def f_prime(x,i):
-        a = 0
-        a = alpha[i,:] * sigmoid(w[i,:]*x-k[i,:]) * (1-sigmoid(w[i,:]*x-k[i,:]))*(w[i,:])
-        return a.sum()
+        return f_prime_param(x,i, alpha, w, k, b)
 
     def g(x,i):
         return g_b(x, i, alpha, w, k, b)
@@ -371,27 +379,31 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     
     S = (z[:,t] -  check_z_t[:,t])
     
-
+    assert P <= t <= T
     if (t < int(T*0.7)):
 
         for i in range(N):
-            for tau in range(P,t):
-                if tau == t:
-                    dD_dZ_a=0
-                    for n in range(N):        
-                        dD_dZ_a = dD_dZ_a  - m_data[n,t]*1/Mt *(z_tilde_data[n,t] - m_data[n,t]*z[n,t])
-                
-                    dDt_dZ[i,tau] = dD_dZ_a
+            #dDt_dZ is zero for all values of tau except for tau = t
+            dD_dZ_a=0
+            for n in range(N):        
+                dD_dZ_a = dD_dZ_a + m_data[n,t]*hyperparam_nu/Mt *(z[n,t]-z_tilde_data[n,t])
+        
+            dDt_dZ[i,t] = dD_dZ_a
 
         for i in range(N):
-            for tau in range(P,t):
+            for tau in range(t-P,t):
                 if tau == t:
                     dCt_dZ[i,tau] = S[i]
-                elif t - P <= tau <= t:
+                elif t - P <= tau <= t-1:
+                    #dgz_v1 = 1/ f_prime(g(z[i,tau],i),i)
+                    dgz_v2 = 1/ f_prime(tilde_y_tm[i, t-tau],i)
+                    #print(dgz_v1 - dgz_v2) #should be zero to make sure dgz shortcut is correct
+                    #pdb.set_trace()
                     dC_dZ_a = 0        
-                    for n in range(N):   # do the sum calculation from here
-                        dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz(z[i,tau],i) 
+                    for n in range(N):   # do the sum calculation from here                 
+                        dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz_v2 
                     dCt_dZ[i,tau] = dC_dZ_a
+
         dTC_dZ = dCt_dZ + dDt_dZ
 
 
@@ -410,13 +422,13 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data):
     cost_missing_train = 0
     cost_missing_test = 0
     cost_missing_validation = 0
-    
+
     if (t < int(T*0.7)):
         
         S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
         cost_missing_train = np.sum(np.square(S1[:]))
 
-    elif( int(T*0.7) < t <= int(T*0.8)):
+    elif ( int(T*0.7) < t <= int(T*0.8)):
 
         S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
         cost_missing_validation = np.sum(np.square(S1[:]))

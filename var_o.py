@@ -22,8 +22,9 @@ N=10
 M=10
 
 P = 2
-NE = 2
+NE = 10
 etanl = 0.01 
+eta_z = 1e-3
 
 N_init = 2
 sigma_noise = 0.0001
@@ -43,9 +44,9 @@ z_tilde_data = np.multiply(z_noisy,m_data)           # masked true data
 z_tilde_data = z_tilde_data[:,0:200]
 
 lamda_n = 0.0025
-pdb.set_trace()
+#pdb.set_trace()
 
-
+hyperparam_nu = 2
 
 def var():
 
@@ -58,7 +59,7 @@ def var():
     
     ##########################################################################################
 
-    cost,cost_test,A_n,cost_Val,z,cost_history_missing = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data)
+    cost,cost_test,A_n,cost_Val,z,cost_history_missing = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data,hyperparam_nu, eta_z )
 
     #cost_linear,cost_test_linear,A_l,cost_val_l = learn_model_linear(NE, z_data, A,etal, lamda_l) 
     

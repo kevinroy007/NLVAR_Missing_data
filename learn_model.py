@@ -33,7 +33,7 @@ from update_z_missing import update_z_missing
 #     return cost[arg_min],cost_test[arg_min],A_n[arg_min],cost_val[arg_min],z[arg_min],cost_history_missing[arg_min]
     
     
-def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
+def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data,hyperparam_nu, eta_z ):
      
     N,T = z_tilde_data.shape
 
@@ -44,14 +44,14 @@ def learn_model_init(NE,eta,lamda,P, M,N_init,m_data,z_tilde_data):
     b = np.random.rand(N)
     A = np.random.randn(N,N,P)
     
-    cost,cost_test,A_n,cost_val,z,cost_history_missing = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data) 
+    cost,cost_test,A_n,cost_val,z,cost_history_missing = learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data,hyperparam_nu, eta_z ) 
    
     return cost,cost_test,A_n,cost_val,z,cost_history_missing
     
 
     
 
-def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO: make A, alpha, w, k, b optional
+def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data,hyperparam_nu, eta_z): #TODO: make A, alpha, w, k, b optional
     
     N, T = z.shape
     N2,N3,P = A.shape
@@ -105,8 +105,8 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
         ################################################################################
         for t in range(P,T):
             #print("time stamp for z updation",t)
-            z,cost_missing[t] = update_z_missing(eta, z, A, alpha, w, k, b, t, m_data, z_tilde_data)
-           
+            z,cost_missing[t] = update_z_missing(eta_z, z, A, alpha, w, k, b, t, m_data, z_tilde_data,hyperparam_nu)
+            # place to calculate MSE for a single instant
         ################################################################################
 
         v_denominators = np.sum(np.square(z), axis=0)
@@ -115,8 +115,9 @@ def learn_model(NE, eta ,z, A, alpha, w, k, b,lamda,m_data,z_tilde_data): #TODO:
         cost_history[epoch] = sum(cost)/sum(v_denominators[0:int(0.7*T)])
         cost_history_test[epoch] = sum(cost_test)/sum(v_denominators[int(0.7*T):int(0.9*T)])
         cost_history_val[epoch] = sum(cost_val)/sum(v_denominators[int(0.9*T):-1])
+        
         cost_history_missing[epoch] = sum(cost_missing)/sum(v_denominators2)
-
+        #finding NMSE
 
     #pdb.set_trace()
     return  cost_history,cost_history_test,A,cost_history_val,z,cost_history_missing

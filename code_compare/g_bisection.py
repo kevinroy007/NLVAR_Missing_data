@@ -1,5 +1,6 @@
 import numpy as np
 import pdb
+from f import f_param, sigmoid
 
 
 def g_bisection(z, i, alpha, w, k, b):
@@ -17,21 +18,24 @@ def g_bisection(z, i, alpha, w, k, b):
     #  return sig 
 
     
-    def sigmoid(x):
+    # def sigmoid(x):
 
-        try:
+    #     try:
             
-            return np.where(x >= 0, 
-                1 / (1 + np.exp(-x)), 
-                np.exp(x) / (1 + np.exp(x)))
+    #         return np.where(x >= 0, 
+    #             1 / (1 + np.exp(-x)), 
+    #             np.exp(x) / (1 + np.exp(x)))
 
-        except: pdb.set_trace()
+    #     except: pdb.set_trace()
         
-    def f(x,i): 
-        a3 = 0
-        a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
-        return (a3.sum() +b[i])
-    assert np.isfinite(alpha).all(), "some alpas are not finite"#
+    # def f(x,i): 
+    #     a3 = 0
+    #     a3 = alpha[i,:]* sigmoid(w[i,:]*x-k[i,:])
+    #     return (a3.sum() +b[i])
+    def f(x,i):
+        return f_param(x, i, alpha, w, k, b)
+
+    assert np.isfinite(alpha).all(), "some alphas are not finite"#
     assert (alpha >= 0).all(), "some alphas are negative" 
     assert (w > 0).all(), "some ws are nonpositive" 
 
@@ -40,10 +44,10 @@ def g_bisection(z, i, alpha, w, k, b):
     zl = b[i]
     vy = 0  
 
-    if z >= zu or z <= zl:
-        pdb.set_trace()
-        
-    assert z < zu and z > zl,"z out of range"
+    # if z >= zu or z <= zl:
+    #     pdb.set_trace()
+
+    #assert z < zu and z > zl,"z out of range"
 
     yl = -10
     while f(yl,i) > z:
