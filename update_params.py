@@ -7,7 +7,7 @@ from projection_simplex import projection_simplex_sort as proj_simplex
 
 
     
-def update_params(eta, z_data, A, alpha, w, k, b, t, z_range,lamda):
+def update_params(eta, z_data, A, alpha, w, k, b, t, z_range,lamda,z_true):
     N,N,P = A.shape
     N,M = k.shape
     #for i in range(N):  # this way of formulation is wrong (loop should be inside backward)
@@ -16,10 +16,10 @@ def update_params(eta, z_data, A, alpha, w, k, b, t, z_range,lamda):
     if b_comparing:
         dC_dA, dc_dalpha, dc_dw, dc_dk, dc_db, cost,cost_test,hat_z_t = compute_gradients_compare( z_data, A, alpha, w, k, b, t)
     else:
-        dC_dA, dc_dalpha, dc_dw, dc_dk, dc_db, cost,cost_test,cost_val = compute_gradients_n( z_data, A, alpha, w, k, b, t)
+        dC_dA, dc_dalpha, dc_dw, dc_dk, dc_db, cost,cost_test,cost_val = compute_gradients_n( z_data, A, alpha, w, k, b, t,z_true)
     
     # projected SGD (stochastic gradient descent (OPTIMIZER)
-
+    
     if not(np.isfinite(dc_dalpha).all):
         print('some dc_dalphas are nan or inf')
         pdb.set_trace()

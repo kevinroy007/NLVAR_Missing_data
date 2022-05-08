@@ -1,33 +1,33 @@
 import sys
-from cvxpy import lambda_min
-from torch import lu
+#from cvxpy import lambda_min
+#from torch import lu
 sys.path.append('code_compare')
 import numpy as np
-import networkx as nx
+#import networkx as nx
 #from LinearVAR import scaleCoefsUntilStable
 from generating import  nonlinear_VAR_realization
 import matplotlib.pyplot as plt
 #from NonlinearVAR import NonlinearVAR
 from LinearVAR_Kevin import learn_model as learn_model_linear
-import networkx as nx
+#import networkx as nx
 from networkx.generators.random_graphs import erdos_renyi_graph
 from learn_model import learn_model
 from learn_model import learn_model_init
 import pdb
 import pickle
-import csv
+
 
 NE = 100
 N=10
 M=10
-
 P = 2
-NE = 10
-etanl = 0.01 
+etanl = 0.001 
 eta_z = 1e-3
-
 N_init = 2
-sigma_noise = 0.0001
+sigma_noise = 1e-1
+lamda_n = 0.0005
+hyperparam_nu = 20
+
 
 np.random.seed(0)
 
@@ -41,14 +41,9 @@ m_data = randbin(N,T,0.05)
 
 z_noise = np.random.randn(N,T)*sigma_noise
 z_noisy = z_true + z_noise
-z_tilde_data = np.multiply(z_noisy,m_data)           # masked true data 
+z_tilde_data = np.multiply(z_noisy,m_data)           
 
-z_tilde_data = z_tilde_data[:,0:200]
 
-lamda_n = 0.0025
-#pdb.set_trace()
-
-hyperparam_nu = 2
 
 def var():
 
@@ -61,31 +56,34 @@ def var():
     
     ##########################################################################################
 
-    cost,cost_test,A_n,cost_Val,z,cost_history_missing = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data,hyperparam_nu, eta_z )
+    cost,cost_test,A_n,cost_Val,z,NMSE_z_train,NMSE_z_test,NMSE_z_val = learn_model_init(NE, etanl ,lamda_n,P, M,N_init,m_data,z_tilde_data,hyperparam_nu, eta_z,z_true )
 
     #cost_linear,cost_test_linear,A_l,cost_val_l = learn_model_linear(NE, z_data, A,etal, lamda_l) 
     
     ##########################################################################################
 
-    pickle.dump(cost,open("lambda_sweep_f_n/cost_"+str(lamda_n)+"_.txt","wb"))
+    #pickle.dump(cost,open("lambda_sweep_f_n/cost_"+str(lamda_n)+"_.txt","wb"))
     #pickle.dump(cost_val,open("lambda_sweep_f_n/cost_val_"+str(lamda)+"_.txt","wb"))
-    pickle.dump(cost_test,open("lambda_sweep_f_n/cost_test_"+str(lamda_n)+"_.txt","wb"))
+    #pickle.dump(cost_test,open("lambda_sweep_f_n/cost_test_"+str(lamda_n)+"_.txt","wb"))
     #pickle.dump(cost_val[NE-1],open("lambda_sweep_f_n/val_lambda_"+str(lamda)+"_.txt","wb"))
     pickle.dump(A_n,open("lambda_sweep_f_n/A_n_"+str(lamda_n)+"_.txt","wb"))
-
     pickle.dump(z,open("lambda_sweep_f_n/z_data_"+str(lamda_n)+"_.txt","wb"))
-    pickle.dump(cost_history_missing,open("lambda_sweep_f_n/cost_history_missing_"+str(lamda_n)+"_.txt","wb"))
-
     
-def main():
-    import cProfile
-    import pstats
+    pickle.dump(NMSE_z_train,open("lambda_sweep_f_n/NMSE_z_train_"+str(lamda_n)+"_.txt","wb"))
+    pickle.dump(NMSE_z_test,open("lambda_sweep_f_n/NMSE_z_test_"+str(lamda_n)+"_.txt","wb"))
+    pickle.dump(NMSE_z_val,open("lambda_sweep_f_n/NMSE_z_val_"+str(lamda_n)+"_.txt","wb"))
 
-    with cProfile.Profile() as pr:
-        var()
-    stats = pstats.Stats(pr)
-    #stats.sort_stats(pstats.SortKey.TIME)
-    stats.dump_stats(filename='needs_profiling_4.prof')
 
-if __name__ == "__main__":
-    main()
+var()
+# def main():
+#     import cProfile
+#     import pstats
+
+#     with cProfile.Profile() as pr:
+#         var()
+#     stats = pstats.Stats(pr)
+#     #stats.sort_stats(pstats.SortKey.TIME)
+#     stats.dump_stats(filename='needs_profiling_4.prof')
+
+# if __name__ == "__main__":
+#     main()

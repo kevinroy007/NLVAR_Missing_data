@@ -5,7 +5,7 @@ from  g_bisection import g_bisection as g_b
 from f import f_param, f_prime_param, sigmoid
 import pdb
 
-def compute_gradients(z_data, A, alpha, w, k, b, t):
+def compute_gradients(z_data, A, alpha, w, k, b, t,z_true):
 
    
 # COMPUTE_GRADIENTS gets gradients for cost at time t 
@@ -129,7 +129,7 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 #not the small t it iterates over all T 
 
 
-    T80p = int(0.8*T)
+    #T80p = int(0.8*T)
 
    
 
@@ -299,7 +299,7 @@ def compute_gradients(z_data, A, alpha, w, k, b, t):
 
 
 
-def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperparam_nu):
+def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperparam_nu,z_true):
     
     N,N,P = A.shape
     N,T = z_tilde_data.shape
@@ -380,6 +380,8 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
     S = (z[:,t] -  check_z_t[:,t])
     
     assert P <= t <= T
+
+
     if (t < int(T*0.7)):
 
         for i in range(N):
@@ -401,7 +403,7 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
                     #pdb.set_trace()
                     dC_dZ_a = 0        
                     for n in range(N):   # do the sum calculation from here                 
-                        dC_dZ_a  = dC_dZ_a -S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz_v2 
+                        dC_dZ_a  = dC_dZ_a - S[n]*f_prime(check_y_t[n],n)*A[n,i,t-tau-1]*dgz_v2 
                     dCt_dZ[i,tau] = dC_dZ_a
 
         dTC_dZ = dCt_dZ + dDt_dZ
@@ -420,21 +422,23 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
     #         dCt_dZ[i,tau] = dC_dZ_a
 
     cost_missing_train = 0
-    cost_missing_test = 0
     cost_missing_validation = 0
+    cost_missing_test = 0
 
     if (t < int(T*0.7)):
         
-        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        S1 = z_true[:,t] - z[:,t]
         cost_missing_train = np.sum(np.square(S1[:]))
 
     elif ( int(T*0.7) < t <= int(T*0.8)):
 
-        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        S1 = z_true[:,t] - z[:,t]
         cost_missing_validation = np.sum(np.square(S1[:]))
 
     else:
-        S1 = z_tilde_data[:,t] - z[:,t]*m_data[:,t]
+        S1 = z_true[:,t] - z[:,t]
         cost_missing_test = np.sum(np.square(S1[:]))
 
-    return z,cost_missing_train,dTC_dZ
+
+
+    return z,cost_missing_train,dTC_dZ,cost_missing_test,cost_missing_validation
