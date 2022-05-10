@@ -82,11 +82,6 @@ fpr,tpr = roc_curve(A_true_1,A_n,thresholds)
 
 ##################################################
 
-
-
-
-
-
 rc('axes', linewidth=2)
 figure, axis = plt.subplots(1)
 
