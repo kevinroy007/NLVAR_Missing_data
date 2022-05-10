@@ -12,52 +12,39 @@ A_true = pickle.load(open("A_true.txt","rb"))
 A_true_1 = pickle.load(open("A_true_1_10.txt","rb"))
 z_data = pickle.load(open("z_data_woAs.txt","rb")) 
 z_data_1 = pickle.load(open("A_wAs_10_4000.txt","rb"))
-cost_n = pickle.load(open("indi_results/cost_0.0005_.txt","rb"))
-cost_n_test = pickle.load(open("indi_results/cost_test_0.0005_.txt","rb"))
+cost_n = pickle.load(open("indi_results/cost_test_0.0018_.txt","rb"))
+cost_n_test = pickle.load(open("indi_results/cost_test_0.0018_.txt","rb"))
 cost_linear = pickle.load(open("indi_results/cost_linear_0.0023_.txt","rb"))
 cost_linear_test = pickle.load(open("indi_results/cost_linear_test_0.0023_.txt","rb"))
-A_n = pickle.load(open("indi_results/A_n_0.0005_.txt","rb"))
-A_l = pickle.load(open("indi_results/A_l_0.0023_.txt","rb"))
+A_n = pickle.load(open("indi_results/A_n_0.0018_.txt","rb"))
+A_l = pickle.load(open("indi_results/A_l_0.0035_.txt","rb"))
 alpha = pickle.load(open("alpha.txt","rb"))
 g = pickle.load(open("g.txt","rb"))
-lamda = pickle.load(open("lamda.txt","rb"))
+lam = pickle.load(open("../lambda_sweep_f_n_1/lam_LVAR.txt","rb"))
 NE = pickle.load(open("NE.txt","rb"))
 hat_z_t = pickle.load(open("hat_z_t.txt","rb"))
 
-
-print(lamda)
+print(lam)
 
 N,N,P = A_true.shape
 N,T  = z_data.shape
 N,M = alpha.shape
 
 
-w = np.random.rand(N,T)
+
+NE = 100
+
+A_dict = {}
+
+for i in range(len(lam)):
+
+    A_dict[lam[i]] = pickle.load(open("../lambda_sweep_f_n_1/A_n_"+str(np.round(lam[i],5))+"_.txt","rb"))
 
 pdb.set_trace()
-NE = 100
+
 
 rc('axes', linewidth=2)
 figure, axis = plt.subplots(1)
-
-#figure.suptitle(" N = "+str(N)+" P = "+str(P)+" T = "+str(T)+ " lambda = "+str(lamda)+" M = "+str(M))
-
-#following command plots without A matrix scaling
-
-# axis[0, 0].plot(z_data[0][:],label = 'sensor 1')
-# axis[0, 0].plot(z_data[1][:],label = "sensor 2")
-# axis[0, 0].plot(z_data[2][:],label = "sensor 3")
-# axis[0, 0].set_title("VAR without A matrix stabilization")
-# axis[0, 0].set_xlabel("Time")
-# axis[0, 0].set_ylabel("z_data")
-# axis[0, 0].legend()
-
-# axis[0, 1].plot(z_data_1[0][:],label = 'sensor 1')
-# axis[0, 1].plot(z_data_1[1][:],label = "sensor 2")
-# axis[0, 1].plot(z_data_1[2][:],label = "sensor 3")
-# axis[0, 1].set_title("VAR with A matrix stabilization")
-# axis[0, 1].set_xlabel("Time")
-# axis[0, 1].legend()
 
 
 legend_prop = {'weight':'bold'}
@@ -76,11 +63,8 @@ axis.yaxis.set_tick_params(labelsize=20)
 
 
 
-# t1 = np.arange(NE)+1
-# axis[1, 1].plot(t1,cost_n,label = "NonLinear VAR")
-# axis[1, 1].set_title("Cost magnification of Non LinearVAR")
-# axis[1, 1].set_xlabel("Epoch")
-# axis[1, 1].legend()
+
+
 
 
 fig = plt.figure()
