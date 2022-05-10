@@ -52,6 +52,26 @@ fig = plt.figure()
 A_true_s = stack_tensor(A_true_1)
 A_n_s = stack_tensor(A_n)
 
+
+fig = plt.figure()
+
+ax1 = fig.add_subplot(1,3,1)
+ax2 = fig.add_subplot(1,3,2)
+ax3 = fig.add_subplot(1,3,3)
+
+ax1.title.set_text('P = true matrix')
+ax2.title.set_text('P = linear model')
+ax3.title.set_text('P = Nonlinear model')
+
+cb1 =  ax1.imshow(A_true_s, vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb2 =  ax2.imshow(A_n_s, vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb3 =  ax3.imshow(A_n_s, vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+
+fig.colorbar(cb1,ax = ax1,orientation='vertical')
+fig.colorbar(cb2,ax = ax2,orientation='vertical')
+fig.colorbar(cb3,ax = ax3,orientation='vertical')
+
+
 pdb.set_trace()
 
 ######################################################
