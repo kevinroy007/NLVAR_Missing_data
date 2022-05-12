@@ -375,7 +375,7 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
     dDt_dZ = np.zeros((N,T))
     dTC_dZ  =  np.zeros((N,T))
 
-    Mt = np.count_nonzero(m_data)
+    Mt = np.count_nonzero(m_data[:,t])
     
     S = (z[:,t] -  check_z_t[:,t])
     
@@ -385,7 +385,7 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
     if (t < int(T*0.7)):
 
         for i in range(N):        
-            dDt_dZ[i,t] = m_data[n,t]*hyperparam_nu/Mt *(z[i,t]-z_tilde_data[i,t])
+            dDt_dZ[i,t] = m_data[i,t]*hyperparam_nu/Mt *(z[i,t]-z_tilde_data[i,t])
 
         for i in range(N):
             for tau in range(t-P,t):
