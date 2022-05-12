@@ -384,13 +384,8 @@ def compute_gradients_z(z, A, alpha, w, k, b, t, m_data, z_tilde_data, hyperpara
 
     if (t < int(T*0.7)):
 
-        for i in range(N):
-            #dDt_dZ is zero for all values of tau except for tau = t
-            dD_dZ_a=0
-            for n in range(N):        
-                dD_dZ_a = dD_dZ_a + m_data[n,t]*hyperparam_nu/Mt *(z[n,t]-z_tilde_data[n,t])
-        
-            dDt_dZ[i,t] = dD_dZ_a
+        for i in range(N):        
+            dDt_dZ[i,t] = m_data[n,t]*hyperparam_nu/Mt *(z[i,t]-z_tilde_data[i,t])
 
         for i in range(N):
             for tau in range(t-P,t):
