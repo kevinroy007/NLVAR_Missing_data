@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./code_compare",
+        "./results/indi_results"
+    ]
+}
