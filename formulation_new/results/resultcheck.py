@@ -1,7 +1,10 @@
 import sys
+import os
+from tkinter.ttk import Sizegrip
+
 sys.path.append('indi_results')
-from resultcheck_l import optimum_lam_linear
-from resultcheck_n import optimum_lam_nonlinear
+from resultcheck_l import optimum_lam_1
+from resultcheck_n import optimum_lam
 import pickle
 import numpy as np
 #import networkx as nx
@@ -10,53 +13,277 @@ import pdb
 from sklearn import metrics
 from matplotlib import rc,rcParams
 from pylab import *
- 
-#lam_l = optimum_lam_linear()
-lam_n = optimum_lam_nonlinear()
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+os.system("clear")
+# file_directory = sys.path[0]
+# os.chdir(file_directory)
 
-#lam_l = np.round(lam_l,7)
-lam_n = np.round(lam_n,7)
+folder_num_1 = 0.05
+folder_num_2 = format(0.3, '.1f')
+folder_num_3 = 0.5
 
-#print("optimum lambda linear",lam_l)
-print("optimum lambda nonlinear",lam_n)
+
+results_folder_loc_1 = "../lambda_sweep_f_n_"+str(folder_num_1)+"/"
+results_folder_loc_2 = "../lambda_sweep_f_n_"+str(folder_num_2)+"/"
+results_folder_loc_3 = "../lambda_sweep_f_n_"+str(folder_num_3)+"/"
+
+
+lam_1 = optimum_lam(results_folder_loc_1)
+lam_2 = optimum_lam(results_folder_loc_2)
+lam_3 = optimum_lam(results_folder_loc_3)
+
+lam_1 = np.round(lam_1,7)
+lam_2 = np.round(lam_2,7)
+lam_3 = np.round(lam_3,7)
+
+
+print("optimum lambda 5 % missing",lam_1)
+print("optimum lambda 30 % missing",lam_2)
+print("optimum lambda 50 % missing",lam_3)
 
 
 A_true_1 = pickle.load(open("../data/synthetic/A_true_P_2_T3000.pickle","rb"))
 
-cost_n = pickle.load(open("../lambda_sweep_f_n_0.10/cost_"+str(lam_n)+"_.txt","rb"))
-cost_n_test = pickle.load(open("../lambda_sweep_f_n_0.10/cost_test_"+str(lam_n)+"_.txt","rb"))
+cost_n_1 = pickle.load(open(results_folder_loc_1 + "cost_"+str(lam_1)+"_.txt","rb"))
+cost_n_1 = pickle.load(open(results_folder_loc_1 + "cost_test_"+str(lam_1)+"_.txt","rb"))
 
-# cost_n_2 = pickle.load(open("../lambda_sweep_f_n_0.10/cost_"+str(lam_n)+"_.txt","rb"))
-# cost_n_test_2 = pickle.load(open("../lambda_sweep_f_n_0.10/cost_test_"+str(lam_n)+"_.txt","rb"))
+cost_n_2 = pickle.load(open(results_folder_loc_2 + "cost_"+str(lam_2)+"_.txt","rb"))
+cost_n_2 = pickle.load(open(results_folder_loc_2 + "cost_test_"+str(lam_2)+"_.txt","rb"))
 
-A_n = pickle.load(open("../lambda_sweep_f_n_0.10/A_n_"+str(lam_n)+"_.txt","rb"))
 
-NE = pickle.load(open("../lambda_sweep_f_n_0.10/NE.txt","rb"))
+cost_n_3 = pickle.load(open(results_folder_loc_3 + "cost_"+str(lam_3)+"_.txt","rb"))
+cost_n_3 = pickle.load(open(results_folder_loc_3 + "cost_test_"+str(lam_3)+"_.txt","rb"))
+
+
+A_n_1 = pickle.load(open(results_folder_loc_1 + "A_n_"+str(lam_1)+"_.txt","rb"))
+A_n_2 = pickle.load(open(results_folder_loc_2 + "A_n_"+str(lam_2)+"_.txt","rb"))
+A_n_3 = pickle.load(open(results_folder_loc_3 + "A_n_"+str(lam_3)+"_.txt","rb"))
+
+
+input_data_filename = "../data/synthetic/synthetic_dataset_P2_T3000.pickle"
+z_data = pickle.load(open(input_data_filename,"rb"))
+NE = pickle.load(open(results_folder_loc_1 + "NE.txt","rb"))
+
+z_1 = pickle.load(open(results_folder_loc_1 + "z_learned"+str(lam_1)+"_.txt","rb"))
+z_2 = pickle.load(open(results_folder_loc_2 + "z_learned"+str(lam_2)+"_.txt","rb"))
+z_3 = pickle.load(open(results_folder_loc_3 + "z_learned"+str(lam_3)+"_.txt","rb"))
+
+
 #print(lamda)
 
 N,N,P = A_true_1.shape
+T  = z_1[1].shape
+#N,M = alpha.shape
 
+
+
+
+
+#pdb.set_trace()
+#NE = 100
 
 rc('axes', linewidth=2)
 figure, axis = plt.subplots(1)
 
 
-pdb.set_trace()
 
 legend_prop = {'weight':'bold'}
 t1 = np.arange(0,NE,1)+1
-axis.plot(t1,(cost_n[0:NE]),label = "NonLinear VAR_train",linewidth=3)
-axis.plot(t1,(cost_n_test[0:NE]),label = "NonLinear VAR_test",linewidth=3)
+axis.plot(t1[::50],(cost_n_1[::50]),"-bo",markersize=9,label = "NLVAR_train 5 % missing",linewidth=3)
+axis.plot(t1[::50],(cost_n_1[::50]),"-y*",markersize=9,label = "NLVAR_test 5 % missing",linewidth=3)
+axis.plot(t1[::50],(cost_n_2[::50]),"-r+",markersize=9,label = "NLVAR_train 30 % missing",linewidth=3)
+axis.plot(t1[::50],(cost_n_2[::50]),"-g^",markersize=9,label = "NLVAR_test 30 % missing",linewidth=3)
+
+axis.plot(t1[::50],(cost_n_3[::50]),"-c+",markersize=9,label = "NLVAR_train 50 % missing",linewidth=3)
+axis.plot(t1[::50],(cost_n_3[::50]),"-m^",markersize=9,label = "NLVAR_test 50 % missing",linewidth=3)
+
 axis.set_ylim([0, 1])
-axis.set_title("NMSE Non LinearVAR")
-axis.set_xlabel("Epoch",fontsize=20)
-axis.set_ylabel("NMSE",fontsize=20)
+#axis.set_title("Cost cmparison LinearVAR vs Non LinearVAR")
+axis.set_xlabel("Epoch",fontsize=35)
+axis.set_ylabel("NMSE",fontsize=35)
 axis.grid()
-axis.legend(prop={"size":20})
-axis.xaxis.set_tick_params(labelsize=20)
-axis.yaxis.set_tick_params(labelsize=20)
+axis.legend(prop={"size":30})
+axis.xaxis.set_tick_params(labelsize=30)
+axis.yaxis.set_tick_params(labelsize=30)
 
 
 
+fig = plt.figure()
+#fig.suptitle(" N = "+str(N)+" P = "+str(P)+" T = "+str(T)+ " lambda = "+str(lamda)+" M = "+str(M))
+ax1 = fig.add_subplot(3,2,1)
+ax1a = fig.add_subplot(3,2,2)
+
+
+ax2 = fig.add_subplot(3,2,3)
+ax2a = fig.add_subplot(3,2,4)
+
+
+ax3 = fig.add_subplot(3,2,5)
+ax3a = fig.add_subplot(3,2,6)
+
+
+ax1.set_ylabel('True Adjacency', fontsize=30)
+ax2.set_ylabel('30 % missing', fontsize=30)
+ax3.set_ylabel('50 % missing', fontsize=30)
+
+
+ax1.title.set_text('P = 1')
+ax1a.title.set_text('P = 2')
+ax1.title.set_size(30)
+ax1a.title.set_size(30)
+
+
+ax1.tick_params(axis='both', which='major', labelsize=30)
+ax1a.tick_params(axis='both', which='major', labelsize=30)
+ax2.tick_params(axis='both', which='major', labelsize=30)
+ax2a.tick_params(axis='both', which='major', labelsize=30)
+ax3.tick_params(axis='both', which='major', labelsize=30)
+ax3a.tick_params(axis='both', which='major', labelsize=30)
+
+
+cb1 =  ax1.imshow(A_true_1[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb1a =  ax1a.imshow(A_true_1[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+
+
+
+cb2 =  ax2.imshow(A_n_2[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb2a =  ax2a.imshow(A_n_2[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+
+
+cb3 =  ax3.imshow(A_n_3[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb3a =  ax3a.imshow(A_n_3[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+
+
+fig.colorbar(cb1,ax = ax1,orientation='vertical')
+fig.colorbar(cb2,ax = ax2,orientation='vertical')
+fig.colorbar(cb3,ax = ax3, orientation='vertical')
+fig.colorbar(cb1a,ax = ax1a,orientation='vertical')
+fig.colorbar(cb2a,ax = ax2a,orientation='vertical')
+fig.colorbar(cb3a,ax = ax3a, orientation='vertical')
+
+
+
+def roc_curve(y_true, y_prob, thresholds):
+
+    fpr = []
+    tpr = []
+    y_true = np.ceil(y_true)
+    for threshold in thresholds:
+         
+        y_pred = np.where(y_prob >= threshold, 1, 0)
+
+        fp = np.sum((y_pred == 1) & (y_true == 0))
+        tp = np.sum((y_pred == 1) & (y_true == 1))
+
+        fn = np.sum((y_pred == 0) & (y_true == 1))
+        tn = np.sum((y_pred == 0) & (y_true == 0))
+
+        fpr.append(fp / (fp + tn))
+        tpr.append(tp / (tp + fn))
+
+    return fpr, tpr
+
+
+fprP_1 = []
+tprP_1 = []
+
+fprP_2 = []
+tprP_2 = []
+
+fprP_3 = []
+tprP_3 = []
+
+thresholds = np.arange(-1,0.5,0.001)
+
+for p in range(P):
+    fpr = [0]*thresholds
+    tpr = [0]*thresholds
+
+    fpr,tpr = roc_curve(A_true_1[:,:,p],A_n_1[:,:,p],thresholds)
+
+    fprP_1.append(fpr)
+    tprP_1.append(tpr)
+
+for p in range(P):
+    fpr = [0]*thresholds
+    tpr = [0]*thresholds
+
+    fpr,tpr= roc_curve(A_true_1[:,:,p],A_n_2[:,:,p],thresholds)
+
+    fprP_2.append(fpr)
+    tprP_2.append(tpr)
+
+for p in range(P):
+    fpr = [0]*thresholds
+    tpr = [0]*thresholds
+
+    fpr,tpr= roc_curve(A_true_1[:,:,p],A_n_3[:,:,p],thresholds)
+
+    fprP_3.append(fpr)
+    tprP_3.append(tpr)
+
+#pdb.set_trace()
+
+figure, axis = plt.subplots(1, P)
+AUC_1 = []
+AUC_2 = []
+AUC_3 = []
+#pdb.set_trace()
+
+for p in range(P):
+    
+    
+    axis[ p].plot(fprP_1[p],tprP_1[p],'-bo', label='NLVAR 5 % missing ')
+    axis[ p].plot(fprP_2[p],tprP_2[p],'-ro', label='NLVAR 30 % missing')
+    axis[ p].plot(fprP_3[p],tprP_3[p],'-go', label='NLVAR 50 % missing')
+
+    axis[ p].set_ylabel("tpr")
+    axis[ p].set_xlabel("fpr")
+    axis[ p].set_title("ROC lag p = "+str(p+1))
+    # for i2 in range(len(thresholds)):
+    #     axis[ p].text(fprP_n[p][i2],tprP_n[p][i2],str(np.round(thresholds[i2],5)))
+    axis[ p].legend()
+
+    #axis[ p].legend()
+    AUC_1.append(metrics.auc(fprP_1[p], tprP_1[p]))
+    AUC_2.append(metrics.auc(fprP_2[p], tprP_2[p]))
+    AUC_3.append(metrics.auc(fprP_3[p], tprP_3[p]))
+
+# figure.suptitle("Hyperparmeter sweep")
+
+print(AUC_1)
+print(AUC_2)
+print(AUC_3)
+
+
+figure, axi = plt.subplots(1,1)
+T = np.arange(0,1000,1)
+
+axi.plot(T[:],z_1[0,:],'ro',mfc='none', label='reconstruction using NLVAR for 5 % missing data')
+# axi.plot(T[:],z_2[0,:], label='30 % missing_VAR ')
+# axi.plot(T[:],z_3[0,:], label='50 % missing_VAR ')
+
+axi.plot(T[:],z_data[0,0:1000], label='true_signal ')
+axi.set_ylabel("sensor measurement")
+axi.set_xlabel("time stamps")
+axi.set_title("ROC ag P = "+str(P))
+axi.legend()
+
+ISE_1 = np.square(z_data[0,0:1000]-z_1[0,0:1000])
+ISE_2 = np.square(z_data[0,0:1000]-z_2[0,0:1000])
+ISE_3 = np.square(z_data[0,0:1000]-z_3[0,0:1000])
+
+figure, axi = plt.subplots(1,1)
+axi.plot(T[:],ISE_3[:], label='50 % missing_VAR ')
+axi.plot(T[:],ISE_2[:], label='30 % missing_VAR ')
+axi.plot(T[:],ISE_1[:], label='5 % missing_VAR ')
+
+
+axi.set_ylabel("ISE")
+axi.set_xlabel("time stamps")
+axi.set_title("ROC__ "+str(P))
+axi.legend()
+
+# try to plot the instantaneos error and look rohans paper regarding signal reconstruction
 
 plt.show()

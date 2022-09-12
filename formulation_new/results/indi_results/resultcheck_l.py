@@ -14,19 +14,18 @@ from pylab import *
 
 
 
-def optimum_lam_linear():
+def optimum_lam_1(results_folder_loc_l):
 
     # note that the location has changed based on the function call
-    lam =  pickle.load(open("../lambda_sweep_f/lam_LVAR.txt","rb")) 
+    lam =  pickle.load(open(results_folder_loc_l + "lam_LVAR.txt","rb")) 
     cost_val = [0]*len(lam)
 
-    
     #pdb.set_trace()
     cost_val = [0]*len(lam)
 
     for i in range(len(lam)):
         
-        cost_val[i] = pickle.load(open("../lambda_sweep_f/val_lambda_"+str(np.round(lam[i],5))+"_.txt","rb"))
+        cost_val[i] = pickle.load(open(results_folder_loc_l + "val_lambda_"+str(np.round(lam[i],5))+"_.txt","rb"))
 
 
     minpos = cost_val.index(min(cost_val))
@@ -44,7 +43,7 @@ def optimum_lam_linear():
     #pdb.set_trace()
 
     #t1 = np.arange(0,lam,1)+1
-    axis.plot(lam,cost_val,'-bo',label = "linear VAR_val",linewidth=3)
+    axis.plot(lam,cost_val,'-bo',label = "NLVAR_val 5 % missing",linewidth=3)
     #axis[ i].plot(val,lam[i], '-bo', label='lambda ')
     #axis.plot(t1,cost_n_test[5:NE],label = "NonLinear VAR_test",linewidth=3)
 

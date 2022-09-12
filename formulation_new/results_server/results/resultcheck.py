@@ -1,7 +1,7 @@
 import sys
 sys.path.append('indi_results')
-from resultcheck_l import optimum_lam_linear
-from resultcheck_n import optimum_lam_nonlinear
+from resultcheck_l import optimum_lam_1
+from resultcheck_n import optimum_lam
 import pickle
 import numpy as np
 #import networkx as nx
@@ -11,8 +11,8 @@ from sklearn import metrics
 from matplotlib import rc,rcParams
 from pylab import *
  
-lam_l,lam_l_s = optimum_lam_linear()
-lam_n,lam_n_s = optimum_lam_nonlinear()
+lam_l,lam_l_s = optimum_lam_1()
+lam_n,lam_n_s = optimum_lam()
 
 
 lam_l = np.round(lam_l,7)

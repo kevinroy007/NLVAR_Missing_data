@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./formulation_new/results/indi_results"
+    ]
+}
