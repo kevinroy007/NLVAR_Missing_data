@@ -13,20 +13,19 @@ from learn_model import learn_model_genie
 M=10
 
 P = 2
-NE = 5
-etanl = 0.001 
+NE = 3
+etanl = 0.0001 
 N_init = 1
 np.random.seed(0)
 sigma_noise = 1e-1
-hyperparam_nu = 10
-eta_z = 1e-4
+hyperparam_nu = 100
+sigma_noise = 1e-1
+eta_z = 1e-6
 
 
-input_data_filename = "data/synthetic/synthetic_dataset_P2_T2000.pickle"
+input_data_filename = "data/synthetic/synthetic_dataset_P2_T3000.pickle"
 z_true = pickle.load(open(input_data_filename,"rb"))
-#z_true = z_true[:,0:200]
-
-
+z_true = z_true[:,0:1000]
 dict = pickle.load(open("function_para/linear_para_dict.pickle","rb"))
 
 
@@ -46,11 +45,13 @@ m_data = randbin(N,T,missing)  # means 5 percent missing data..
 z_noise = np.random.randn(N,T)*sigma_noise
 z_noisy = z_true + z_noise
 z_tilde_data = np.multiply(z_noisy,m_data) 
-pickle.dump(z_tilde_data, open("results/z_tilde_data.txt","wb"))
 
 ####################################################################################
 def var(lamda):
-#pdb.set_trace()   
+#pdb.set_trace()
+
+    
+
     ##########################################################################################
 
     cost,cost_test,A_n,cost_val,z = learn_model_balta(NE, etanl ,z_tilde_data,lamda,P, M,N_init,dict,m_data,hyperparam_nu,eta_z) 
@@ -70,16 +71,20 @@ results_folder_name = "lambda_sweep_f_n_"+str(missing)
 if not os.path.isdir(results_folder_name):
     os.mkdir(results_folder_name)
 
-# lam1 = np.arange(0.001,0.01,0.002)
-# lam2 = np.arange(0.01,0.1,0.02)
-# lam = np.append(lam1,lam2)
+lam1 = np.arange(0.001,0.01,0.002)
+lam2 = np.arange(0.01,0.2,0.02)
+lam = np.append(lam1,lam2)
 lam = np.arange(0.001,0.002,0.001)
+
+
+pdb.set_trace()
 
 
 
 pickle.dump(lam, open(results_folder_name + "/lam_LVAR.txt","wb"))
 pickle.dump(NE,  open(results_folder_name + "/NE.txt","wb"))
 
+pickle.dump(z_tilde_data, open(results_folder_name +"/z_tilde_data.txt","wb"))
 
 if __name__ ==  '__main__':
     

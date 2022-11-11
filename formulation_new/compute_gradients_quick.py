@@ -9,7 +9,7 @@ import torch
 # from formulation_B.basic_functions import plot_the_function
 
 def compute_gradients(
-    z, A, alpha, w, k, b, gamma, t, 
+    z_data, A, alpha, w, k, b, gamma, t, 
     onlyForward = False, g_tol = 1e-6, model='nonlinear'):  
 
     #print(t)
@@ -21,7 +21,7 @@ def compute_gradients(
 # z_data N x T array, containing the given z data
     # N: number of sensors
     # T: number of time instants
-    N, T = z.shape
+    N, T = z_data.shape
 # A: N x N x P array, containing VAR parameter matrices
     N,N,P = A.shape
 # alpha: N x M array, alpha parameters
@@ -109,7 +109,7 @@ def compute_gradients(
     #         z_i_tmp = z_data[i_prime, t-p]
     #         tilde_y_tm[i_prime, p] = g(z_i_tmp,i_prime)
     tilde_y_tm2 = torch.zeros((N, P+1))
-    z_in = np.flip(z[:,t-P:t], 1).copy()   #why copy is used 
+    z_in = np.flip(z_data[:,t-P:t], 1).copy()   #why copy is used 
     tilde_y_tm2[:,1:] = gt(torch.tensor(z_in))
 
     
@@ -146,7 +146,7 @@ def compute_gradients(
     # S = 2*( hat_z_t2 - z_data[:,t])                      
     # cost_u = np.sum(np.square(S[:]/2))
 
-    S2 = 2*( hat_z_t2 - z[:,t])
+    S2 = 2*( hat_z_t2 - z_data[:,t])
     cost_u = torch.sum(torch.square(S2/2))
     
     if onlyForward:
@@ -403,6 +403,6 @@ def compute_gradients_z(z, A, alpha, w, k, b, gamma, t, m_data, z_tilde_data, hy
 
 
 
-    return z,dTC_dZ
+    return z,cost_missing_train,dTC_dZ,cost_missing_test,cost_missing_validation
 
 

@@ -41,7 +41,6 @@ def learn_model_balta(NE, etanl ,z_tilde_data,lamda,P, M,N_init,dict,m_data,hype
     N,T = z_tilde_data.shape
     print ("linear function initialisation")
     
-    #mean taken over time for 0 entries
     z = z_tilde_data
     alpha = dict["alpha"]
     w = dict["w"]
@@ -212,17 +211,17 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
         
         if model == 'nonlinear' and b_normalize_after_epoch:    # why this ???
             w,k,_ = indirectly_normalize_y(z_tilde_data, alpha, w, k, b)
-        
-        if model == "nonlinear":
-            for t in range(P,T):
-                z = update_z_missing(eta_z, z, A, alpha, w, k, b,gamma, t, m_data, z_tilde_data,hyperparam_nu)
-            
+           
         for t in range(P, T): # squared error evaluation
             dC_dA, _, _, _, _, sqerr[t] = compute_gradients(
                 z, A, alpha, w, k, b, gamma, t, model = model, onlyForward=True)   
 
         #pdb.set_trace()
-        
+        if model == "nonlinear":
+            for t in range(P,T):
+
+                z,MSE_z_train[t],MSE_z_test[t],MSE_z_val[t] = update_z_missing(eta_z, z, A, alpha, w, k, b,gamma, t, m_data, z_tilde_data,hyperparam_nu)
+            
 
                  
     
@@ -231,9 +230,9 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
         nmse_history_val[epoch]   = sum(sqerr[set_val_t])  /sum(v_den[set_val_t]  )
         nmse_history_test[epoch]  = sum(sqerr[set_test_t]) /sum(v_den[set_test_t] )
 
-        # v_denominators2 = np.sum(np.square(z_true), axis=0)
+        #v_denominators2 = np.sum(np.square(z_true), axis=0)
         
-        # # the following is not currently passed we will be plotting the error of the model 
+        # the following is not currently passed we will be plotting the error of the model 
 
         # NMSE_z_train[epoch] = sum(MSE_z_train)/sum(v_denominators2)
         # NMSE_z_test[epoch] = sum(MSE_z_test)/sum(v_denominators2)
@@ -244,8 +243,7 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
             model, "epoch {:0>4d}  ".format(epoch),
             "NMSE: train {:.4f} ".format(nmse_history_train[epoch]),
             "val {:.4f} ".format(nmse_history_val[epoch]),
-            "test {:.4f}".format(nmse_history_test[epoch]),
-            "lamda {:.4f}".format(lamda))
+            "test {:.4f}".format(nmse_history_test[epoch]))
     
     dict_learned_params = {"alpha":alpha,"w":w,"k":k,"b":b}
     return  nmse_history_train,nmse_history_test,A,nmse_history_val,z
