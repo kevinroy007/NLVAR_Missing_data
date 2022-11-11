@@ -18,12 +18,9 @@ def optimum_lam(results_folder_loc_n):
     #NE =  pickle.load(open("NE.txt","rb"))
 
     lam =  pickle.load(open(results_folder_loc_n + "lam_LVAR.txt","rb"))
-    # lam1 = np.arange(0.01,0.07,0.02)
-    # lam2 = np.arange(0.001,0.009,0.001)
-    #lam = [0.01,0.03,0.05,0.07,0.09,0.11,0.13,0.15,0.]
-    # lam2 = [0.01]
-    #lama = np.append(lam1,lam2)
-    #lam = [0.11,0.15,0.17]
+
+  
+
     
 
     cost_val = [0]*len(lam)

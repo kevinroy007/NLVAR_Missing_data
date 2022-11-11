@@ -36,7 +36,7 @@ def learn_model_genie(NE,eta,z_tilde_data,lamda,P, M,N_init,dict,alpha,w,k,b,A, 
 
 
 
-def learn_model_balta(NE, etanl ,z_tilde_data,lamda,P, M,N_init,dict,m_data,hyperparam_nu,eta_z,z_true, NE_linearinit = 10, \
+def learn_model_balta(NE, etanl ,z_tilde_data,lamda,P, M,N_init,dict,m_data,hyperparam_nu,eta_z, NE_linearinit = 10, \
     b_normalize_after_epoch = False):
     N,T = z_tilde_data.shape
     print ("linear function initialisation")
@@ -58,7 +58,7 @@ def learn_model_balta(NE, etanl ,z_tilde_data,lamda,P, M,N_init,dict,m_data,hype
 
     cost,cost_test,A_n,cost_val,z = \
         learn_model(NE, etanl ,z_tilde_data, A, alpha, w, k, b,lamda,dict_v, \
-            z,m_data,hyperparam_nu,eta_z,z_true, \
+            z,m_data,hyperparam_nu,eta_z, \
             NE_linearInit=NE_linearinit, \
             b_normalize_after_epoch = b_normalize_after_epoch) 
     
@@ -101,15 +101,15 @@ def learn_model_init(NE,eta,z_tilde_data,lamda,P, M,N_init, NE_linearinit = 30, 
     
     return cost[arg_min],cost_test[arg_min],A_n[arg_min],cost_val[arg_min]
 
-def learn_model_linear(NE,z_tilde_data, A_l,eta,lamda,dict_v,z,m_data,hyperparam_nu,eta_z,z_true):
+def learn_model_linear(NE,z_tilde_data, A_l,eta,lamda,dict_v,z,m_data,hyperparam_nu,eta_z):
     alpha, w, k, b = (None,)*4
     return learn_model(NE, eta, z_tilde_data, A_l, 
         alpha, w, k, b,lamda,dict_v, \
-        z,m_data,hyperparam_nu,eta_z,z_true,model = 'linear')
+        z,m_data,hyperparam_nu,eta_z,model = 'linear')
 
 
 def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,  
-                z,m_data,hyperparam_nu,eta_z,z_true,
+                z,m_data,hyperparam_nu,eta_z,
                 model = 'nonlinear',  NE_linearInit = 10,
                 b_normalize_after_epoch = True):
     
@@ -142,7 +142,7 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
         # for nonlinear A initialisation using linear VAR
         _, _, A,_,_ = learn_model_linear(        
             NE_linearInit, y_data_normalized.numpy(), 
-            np.zeros((N,N,P)), eta, lamda,dict_v,z,m_data,hyperparam_nu,eta_z,z_true)
+            np.zeros((N,N,P)), eta, lamda,dict_v,z,m_data,hyperparam_nu,eta_z)
 
         
     elif model == 'linear':
@@ -212,17 +212,17 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
         
         if model == 'nonlinear' and b_normalize_after_epoch:    # why this ???
             w,k,_ = indirectly_normalize_y(z_tilde_data, alpha, w, k, b)
-           
+        
+        if model == "nonlinear":
+            for t in range(P,T):
+                z = update_z_missing(eta_z, z, A, alpha, w, k, b,gamma, t, m_data, z_tilde_data,hyperparam_nu)
+            
         for t in range(P, T): # squared error evaluation
             dC_dA, _, _, _, _, sqerr[t] = compute_gradients(
                 z, A, alpha, w, k, b, gamma, t, model = model, onlyForward=True)   
 
         #pdb.set_trace()
-        if model == "nonlinear":
-            for t in range(P,T):
-
-                z,MSE_z_train[t],MSE_z_test[t],MSE_z_val[t] = update_z_missing(eta_z, z, A, alpha, w, k, b,gamma, t, m_data, z_tilde_data,hyperparam_nu,z_true)
-            
+        
 
                  
     
@@ -231,20 +231,21 @@ def learn_model(NE, eta ,z_tilde_data, A_in, alpha, w, k, b,lamda,dict_v,
         nmse_history_val[epoch]   = sum(sqerr[set_val_t])  /sum(v_den[set_val_t]  )
         nmse_history_test[epoch]  = sum(sqerr[set_test_t]) /sum(v_den[set_test_t] )
 
-        v_denominators2 = np.sum(np.square(z_true), axis=0)
+        # v_denominators2 = np.sum(np.square(z_true), axis=0)
         
-        # the following is not currently passed we will be plotting the error of the model 
+        # # the following is not currently passed we will be plotting the error of the model 
 
-        NMSE_z_train[epoch] = sum(MSE_z_train)/sum(v_denominators2)
-        NMSE_z_test[epoch] = sum(MSE_z_test)/sum(v_denominators2)
-        NMSE_z_val[epoch] = sum(MSE_z_val)/sum(v_denominators2)
+        # NMSE_z_train[epoch] = sum(MSE_z_train)/sum(v_denominators2)
+        # NMSE_z_test[epoch] = sum(MSE_z_test)/sum(v_denominators2)
+        # NMSE_z_val[epoch] = sum(MSE_z_val)/sum(v_denominators2)
 
 
         print(
             model, "epoch {:0>4d}  ".format(epoch),
             "NMSE: train {:.4f} ".format(nmse_history_train[epoch]),
             "val {:.4f} ".format(nmse_history_val[epoch]),
-            "test {:.4f}".format(nmse_history_test[epoch]))
+            "test {:.4f}".format(nmse_history_test[epoch]),
+            "lamda {:.4f}".format(lamda))
     
     dict_learned_params = {"alpha":alpha,"w":w,"k":k,"b":b}
     return  nmse_history_train,nmse_history_test,A,nmse_history_val,z

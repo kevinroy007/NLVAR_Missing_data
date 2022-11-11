@@ -246,7 +246,7 @@ def compute_gradients(
 
 
 
-def compute_gradients_z(z, A, alpha, w, k, b, gamma, t, m_data, z_tilde_data, hyperparam_nu,z_true,g_tol = 1e-6, model='nonlinear'):
+def compute_gradients_z(z, A, alpha, w, k, b, gamma, t, m_data, z_tilde_data, hyperparam_nu,g_tol = 1e-6, model='nonlinear'):
     
     N,N,P = A.shape
     N,T = z_tilde_data.shape
@@ -387,22 +387,22 @@ def compute_gradients_z(z, A, alpha, w, k, b, gamma, t, m_data, z_tilde_data, hy
     cost_missing_validation = 0
     cost_missing_test = 0
 
-    if (t < int(T*0.7)):
+    # if (t < int(T*0.7)):
         
-        S1 = z_true[:,t] - z[:,t]
-        cost_missing_train = np.sum(np.square(S1[:]))
+    #     S1 = z_true[:,t] - z[:,t]
+    #     cost_missing_train = np.sum(np.square(S1[:]))
 
-    elif ( int(T*0.7) < t <= int(T*0.8)):
+    # elif ( int(T*0.7) < t <= int(T*0.8)):
 
-        S1 = z_true[:,t] - z[:,t]
-        cost_missing_validation = np.sum(np.square(S1[:]))
+    #     S1 = z_true[:,t] - z[:,t]
+    #     cost_missing_validation = np.sum(np.square(S1[:]))
 
-    else:
-        S1 = z_true[:,t] - z[:,t]
-        cost_missing_test = np.sum(np.square(S1[:]))
+    # else:
+    #     S1 = z_true[:,t] - z[:,t]
+    #     cost_missing_test = np.sum(np.square(S1[:]))
 
 
 
-    return z,cost_missing_train,dTC_dZ,cost_missing_test,cost_missing_validation
+    return z,dTC_dZ
 
 

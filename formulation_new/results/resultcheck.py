@@ -27,6 +27,7 @@ results_folder_loc_1 = "../lambda_sweep_f_n_"+str(folder_num_1)+"/"
 results_folder_loc_2 = "../lambda_sweep_f_n_"+str(folder_num_2)+"/"
 results_folder_loc_3 = "../lambda_sweep_f_n_"+str(folder_num_3)+"/"
 
+z_tilde_data = pickle.load(open("z_tilde_data.txt","rb"))
 
 lam_1 = optimum_lam(results_folder_loc_1)
 lam_2 = optimum_lam(results_folder_loc_2)
@@ -37,6 +38,7 @@ lam_2 = np.round(lam_2,7)
 lam_3 = np.round(lam_3,7)
 
 
+
 print("optimum lambda 5 % missing",lam_1)
 print("optimum lambda 30 % missing",lam_2)
 print("optimum lambda 50 % missing",lam_3)
@@ -45,14 +47,14 @@ print("optimum lambda 50 % missing",lam_3)
 A_true_1 = pickle.load(open("../data/synthetic/A_true_P_2_T3000.pickle","rb"))
 
 cost_n_1 = pickle.load(open(results_folder_loc_1 + "cost_"+str(lam_1)+"_.txt","rb"))
-cost_n_1 = pickle.load(open(results_folder_loc_1 + "cost_test_"+str(lam_1)+"_.txt","rb"))
+cost_n_1_t = pickle.load(open(results_folder_loc_1 + "cost_test_"+str(lam_1)+"_.txt","rb"))
 
 cost_n_2 = pickle.load(open(results_folder_loc_2 + "cost_"+str(lam_2)+"_.txt","rb"))
-cost_n_2 = pickle.load(open(results_folder_loc_2 + "cost_test_"+str(lam_2)+"_.txt","rb"))
+cost_n_2_t = pickle.load(open(results_folder_loc_2 + "cost_test_"+str(lam_2)+"_.txt","rb"))
 
 
 cost_n_3 = pickle.load(open(results_folder_loc_3 + "cost_"+str(lam_3)+"_.txt","rb"))
-cost_n_3 = pickle.load(open(results_folder_loc_3 + "cost_test_"+str(lam_3)+"_.txt","rb"))
+cost_n_3_t = pickle.load(open(results_folder_loc_3 + "cost_test_"+str(lam_3)+"_.txt","rb"))
 
 
 A_n_1 = pickle.load(open(results_folder_loc_1 + "A_n_"+str(lam_1)+"_.txt","rb"))
@@ -63,10 +65,11 @@ A_n_3 = pickle.load(open(results_folder_loc_3 + "A_n_"+str(lam_3)+"_.txt","rb"))
 input_data_filename = "../data/synthetic/synthetic_dataset_P2_T3000.pickle"
 z_data = pickle.load(open(input_data_filename,"rb"))
 NE = pickle.load(open(results_folder_loc_1 + "NE.txt","rb"))
-
+ 
 z_1 = pickle.load(open(results_folder_loc_1 + "z_learned"+str(lam_1)+"_.txt","rb"))
 z_2 = pickle.load(open(results_folder_loc_2 + "z_learned"+str(lam_2)+"_.txt","rb"))
 z_3 = pickle.load(open(results_folder_loc_3 + "z_learned"+str(lam_3)+"_.txt","rb"))
+
 
 
 #print(lamda)
@@ -84,18 +87,19 @@ T  = z_1[1].shape
 
 rc('axes', linewidth=2)
 figure, axis = plt.subplots(1)
-
+pdb.set_trace()
 
 
 legend_prop = {'weight':'bold'}
 t1 = np.arange(0,NE,1)+1
-axis.plot(t1[::50],(cost_n_1[::50]),"-bo",markersize=9,label = "NLVAR_train 5 % missing",linewidth=3)
-axis.plot(t1[::50],(cost_n_1[::50]),"-y*",markersize=9,label = "NLVAR_test 5 % missing",linewidth=3)
-axis.plot(t1[::50],(cost_n_2[::50]),"-r+",markersize=9,label = "NLVAR_train 30 % missing",linewidth=3)
-axis.plot(t1[::50],(cost_n_2[::50]),"-g^",markersize=9,label = "NLVAR_test 30 % missing",linewidth=3)
+axis.plot(t1,(cost_n_1),"-bo",markersize=9,label = "NLVAR_train 5 % missing",linewidth=3)
+axis.plot(t1,(cost_n_1_t),"-y*",markersize=9,label = "NLVAR_test 5 % missing",linewidth=3)
+axis.plot(t1,(cost_n_2),"-r+",markersize=9,label = "NLVAR_train 30 % missing",linewidth=3)
+axis.plot(t1,(cost_n_2_t),"-g^",markersize=9,label = "NLVAR_test 30 % missing",linewidth=3)
 
-axis.plot(t1[::50],(cost_n_3[::50]),"-c+",markersize=9,label = "NLVAR_train 50 % missing",linewidth=3)
-axis.plot(t1[::50],(cost_n_3[::50]),"-m^",markersize=9,label = "NLVAR_test 50 % missing",linewidth=3)
+axis.plot(t1,(cost_n_3),"-c+",markersize=9,label = "NLVAR_train 50 % missing",linewidth=3)
+axis.plot(t1,(cost_n_3_t),"-m^",markersize=9,label = "NLVAR_test 50 % missing",linewidth=3)
+
 
 axis.set_ylim([0, 1])
 #axis.set_title("Cost cmparison LinearVAR vs Non LinearVAR")
@@ -106,7 +110,7 @@ axis.legend(prop={"size":30})
 axis.xaxis.set_tick_params(labelsize=30)
 axis.yaxis.set_tick_params(labelsize=30)
 
-
+pdb.set_trace()
 
 fig = plt.figure()
 #fig.suptitle(" N = "+str(N)+" P = "+str(P)+" T = "+str(T)+ " lambda = "+str(lamda)+" M = "+str(M))
@@ -123,7 +127,7 @@ ax3a = fig.add_subplot(3,2,6)
 
 
 ax1.set_ylabel('True Adjacency', fontsize=30)
-ax2.set_ylabel('30 % missing', fontsize=30)
+ax2.set_ylabel('5 % missing', fontsize=30)
 ax3.set_ylabel('50 % missing', fontsize=30)
 
 
@@ -146,8 +150,8 @@ cb1a =  ax1a.imshow(A_true_1[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='aut
 
 
 
-cb2 =  ax2.imshow(A_n_2[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
-cb2a =  ax2a.imshow(A_n_2[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb2 =  ax2.imshow(A_n_1[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
+cb2a =  ax2a.imshow(A_n_1[:,:,1], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
 
 
 cb3 =  ax3.imshow(A_n_3[:,:,0], vmin=0, vmax=0.427, cmap='jet', aspect='auto')
@@ -167,16 +171,17 @@ def roc_curve(y_true, y_prob, thresholds):
 
     fpr = []
     tpr = []
-    y_true = np.ceil(y_true)
+    y_true_bin = np.where(abs(y_true)>0, 1, 0)
+
     for threshold in thresholds:
          
-        y_pred = np.where(y_prob >= threshold, 1, 0)
+        y_pred = np.where(np.abs(y_prob) >= threshold, 1, 0)
 
-        fp = np.sum((y_pred == 1) & (y_true == 0))
-        tp = np.sum((y_pred == 1) & (y_true == 1))
+        fp = np.sum((y_pred == 1) & (y_true_bin == 0))
+        tp = np.sum((y_pred == 1) & (y_true_bin == 1))
 
-        fn = np.sum((y_pred == 0) & (y_true == 1))
-        tn = np.sum((y_pred == 0) & (y_true == 0))
+        fn = np.sum((y_pred == 0) & (y_true_bin == 1))
+        tn = np.sum((y_pred == 0) & (y_true_bin == 0))
 
         fpr.append(fp / (fp + tn))
         tpr.append(tp / (tp + fn))
@@ -193,7 +198,7 @@ tprP_2 = []
 fprP_3 = []
 tprP_3 = []
 
-thresholds = np.arange(-1,0.5,0.001)
+thresholds = np.arange(0,0.5,0.001)
 
 for p in range(P):
     fpr = [0]*thresholds
@@ -259,11 +264,10 @@ print(AUC_3)
 figure, axi = plt.subplots(1,1)
 T = np.arange(0,1000,1)
 
-axi.plot(T[:],z_1[0,:],'ro',mfc='none', label='reconstruction using NLVAR for 5 % missing data')
-# axi.plot(T[:],z_2[0,:], label='30 % missing_VAR ')
-# axi.plot(T[:],z_3[0,:], label='50 % missing_VAR ')
-
+axi.plot(T[:],z_1[0,0:1000],'ro',mfc='none', label='reconstruction using NLVAR for 5 % missing data')
 axi.plot(T[:],z_data[0,0:1000], label='true_signal ')
+axi.plot(T[:],z_tilde_data[0,0:1000], 'xg', label='noisy signal ')
+
 axi.set_ylabel("sensor measurement")
 axi.set_xlabel("time stamps")
 axi.set_title("ROC ag P = "+str(P))
