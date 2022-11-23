@@ -6,9 +6,17 @@ Topology identification from multiple time series has been proved to be useful f
 
 ## libraries Used
 
-* [Technology name](https://example.com): Version 12.3 
-* [Technology name](https://example.com): Version 2.34
-* [Library name](https://example.com): Version 1234
+* [Numpy]
+* [Pytorch]
+* [pickle]
+* [multiprocessing]
+* [sys]
+* [random]
+* [os]
+* [matplotlib]
+* [networkx]
+* [sklearn]
+* 
 
 
 ![Screenshot 2022-11-23 at 17 05 07](https://user-images.githubusercontent.com/64849646/203593832-7a3fcc1f-974e-442e-99a5-324906dfd5f9.png)
