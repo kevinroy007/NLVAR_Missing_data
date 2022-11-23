@@ -6,5 +6,5 @@ Topology identification from multiple time series has been proved to be useful f
 
 ![Screenshot 2022-11-23 at 17 05 07](https://user-images.githubusercontent.com/64849646/203593832-7a3fcc1f-974e-442e-99a5-324906dfd5f9.png)
 
-**Results**
+
 ![Screenshot 2022-11-23 at 17 05 31](https://user-images.githubusercontent.com/64849646/203593847-288103d0-9d25-437b-bef2-ba0019b1dcef.png)
